@@ -93,22 +93,43 @@ from django.conf import settings
 # -------------------------
 # Admission Form
 # -------------------------
+from django.shortcuts import render
+from django.contrib import messages
+from .models import Student
+
 def admission_form(request):
 
     if request.method == "POST":
 
-        student = Student.objects.create(
-            name=request.POST.get("name"),
-            phone=request.POST.get("phone"),
-            email=request.POST.get("email"),
-            course=request.POST.get("course"),
-            center_name=request.POST.get("center_name"),
-            address=request.POST.get("address"),
+        name = request.POST.get("name")
+        phone = request.POST.get("phone")
+        email = request.POST.get("email")
+        course = request.POST.get("course")
+        center_name = request.POST.get("center_name")
+        address = request.POST.get("address")
+        password = request.POST.get("password")
+        photo = request.FILES.get("photo")
 
-            # ✅ plain password
-            password=request.POST.get("password"),
+        # Check duplicate Email
+        if Student.objects.filter(email=email).exists():
+            messages.error(request, "❌ This Email ID is already registered.")
+            return render(request, "admission/form.html")
 
-            photo=request.FILES.get("photo"),
+        # Check duplicate Phone
+        if Student.objects.filter(phone=phone).exists():
+            messages.error(request, "❌ This Phone Number is already registered.")
+            return render(request, "admission/form.html")
+
+        # Save Student
+        Student.objects.create(
+            name=name,
+            phone=phone,
+            email=email,
+            course=course,
+            center_name=center_name,
+            address=address,
+            password=password,   # Plain password
+            photo=photo,
             payment_status="pending",
             is_approved=False
         )
@@ -116,7 +137,6 @@ def admission_form(request):
         return render(request, "admission/success.html")
 
     return render(request, "admission/form.html")
-
 # -------------------------
 # Create Razorpay Order
 # -------------------------

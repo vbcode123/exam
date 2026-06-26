@@ -1,72 +1,70 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student Admission</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
-body{
-background:#eef3ff;
-font-family:sans-serif;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.card{
-background:white;
-padding:30px;
-width:400px;
-border-radius:12px;
-box-shadow:0 10px 25px rgba(0,0,0,.15);
-}
-
-input, textarea{
-width:100%;
-padding:10px;
-margin-bottom:10px;
-border-radius:8px;
-border:1px solid #ccc;
-}
-
-button{
-width:100%;
-padding:12px;
-background:#0066ff;
-color:white;
-border:none;
-border-radius:8px;
-font-size:16px;
-cursor:pointer;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;background:linear-gradient(135deg,#4facfe,#00f2fe)}
+.card{width:100%;max-width:480px;background:rgba(255,255,255,.18);backdrop-filter:blur(18px);border-radius:20px;padding:30px;border:1px solid rgba(255,255,255,.25);box-shadow:0 15px 35px rgba(0,0,0,.25)}
+.top-bar{display:flex;justify-content:flex-end;margin-bottom:15px}
+.home-btn{padding:10px 18px;text-decoration:none;background:#fff;color:#0066ff;font-weight:600;border-radius:10px}
+h2{text-align:center;color:#fff;margin-bottom:25px}
+.input-group{margin-bottom:16px}
+input,textarea{width:100%;padding:14px;border:none;outline:none;border-radius:12px;background:#fff}
+textarea{resize:none;height:90px}
+button{width:100%;padding:15px;border:none;border-radius:12px;background:#0066ff;color:#fff;font-size:17px;font-weight:600;cursor:pointer}
+.note{text-align:center;color:#fff;margin-top:15px}
 </style>
 </head>
-
 <body>
 
 <div class="card">
 
-<h2>Student Admission</h2>
-
-<form id="admissionForm" method="post" enctype="multipart/form-data">
-{% csrf_token %}
-
-<input name="name" placeholder="Full Name" required>
-<input name="phone" placeholder="Phone" required>
-<input name="email" placeholder="Email" required>
-<input name="course" placeholder="Course">
-<input name="center_name" placeholder="Center">
-<textarea name="address" placeholder="Address"></textarea>
-<input type="password" name="password" placeholder="Password" required>
-<input type="file" name="photo" required>
-
-<button type="submit">Submit Admission</button>
-
-</form>
-
+<div class="top-bar">
+<a href="{% url 'home' %}" class="home-btn">🏠 Home</a>
 </div>
 
+<h2>🎓 Student Admission</h2>
+
+{% if messages %}
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+{% for message in messages %}
+Swal.fire({
+icon:"{% if message.tags == 'success' %}success{% else %}error{% endif %}",
+title:"{% if message.tags == 'success' %}Success{% else %}Oops...{% endif %}",
+text:"{{ message|escapejs }}",
+confirmButtonColor:"#0066ff"
+});
+{% endfor %}
+});
+</script>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+
+<div class="input-group"><input type="text" name="name" placeholder="👤 Full Name" required></div>
+<div class="input-group"><input type="tel" name="phone" placeholder="📞 Phone Number" required></div>
+<div class="input-group"><input type="email" name="email" placeholder="📧 Email Address" required></div>
+<div class="input-group"><input type="text" name="course" placeholder="📚 Course Name"></div>
+<div class="input-group"><input type="text" name="center_name" placeholder="🏫 Center Name"></div>
+<div class="input-group"><textarea name="address" placeholder="📍 Address"></textarea></div>
+<div class="input-group"><input type="password" name="password" placeholder="🔒 Password" required></div>
+<div class="input-group"><input type="file" name="photo" required></div>
+
+<button type="submit">🚀 Submit Admission</button>
+</form>
+
+<div class="note">Please fill all the required details carefully.</div>
+
+</div>
 </body>
 </html>
