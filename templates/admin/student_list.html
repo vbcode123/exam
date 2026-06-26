@@ -1,0 +1,199 @@
+{% extends 'admin/dashboard.html' %}
+{% load static %}
+
+{% block title %}Student List{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- PAGE HEADER -->
+    <div class="app-page-title mb-3">
+        <div class="page-title-wrapper d-flex flex-wrap justify-content-between align-items-center">
+
+            <div class="page-title-heading d-flex align-items-center">
+                <div class="page-title-icon me-2">
+                    <i class="pe-7s-users icon-gradient bg-mean-fruit"></i>
+                </div>
+                <div>
+                    Student List
+                    <div class="page-title-subheading">
+                        Manage all registered students
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-title-actions mt-2 mt-md-0 d-flex gap-2 flex-wrap">
+                <a href="{% url 'add_student' %}" class="btn btn-success btn-sm">
+                    <i class="fas fa-plus"></i> Add Student
+                </a>
+
+                <a href="javascript:void(0);" id="downloadCardsBtn" class="btn btn-primary btn-sm">
+                    <i class="fas fa-download"></i> Download All Cards
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="main-card card shadow-sm">
+
+        {% if students %}
+        <div class="table-responsive">
+            <table id="students-table" class="table table-bordered table-hover align-middle w-100">
+
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Center</th>
+                        <th>Photo</th>
+                        <th style="width:260px;">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for s in students %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+
+                        <td>
+                            {{ s.name }}
+                            {% if not s.is_approved %}
+                                <span class="badge bg-warning ms-1">Admission</span>
+                            {% else %}
+                                <span class="badge bg-success ms-1">Approved</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ s.phone }}</td>
+                        <td>{{ s.email|default:"-" }}</td>
+                        <td>{{ s.center_name|default:"-" }}</td>
+
+                        <td class="text-center">
+                            {% if s.photo %}
+                                <img src="{{ s.photo.url }}" class="student-img">
+                            {% else %}
+                                <span class="text-muted">No Photo</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- ACTIONS -->
+                        <td class="text-center">
+                            <div class="action-btns">
+
+                                <a href="{% url 'admission_view' s.id %}"
+                                   class="btn btn-primary btn-sm"
+                                   title="View Admission">
+                                    <i class="fas fa-file-alt"></i>
+                                </a>
+
+                                {% if s.is_approved %}
+                                    <a href="{% url 'student_view' s.id %}"
+                                       class="btn btn-info btn-sm"
+                                       title="View Student">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+
+                                    <a href="{% url 'student_edit' s.id %}"
+                                       class="btn btn-warning btn-sm"
+                                       title="Edit Student">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'admission_approve' s.id %}"
+                                       class="btn btn-success btn-sm"
+                                       title="Approve Admission">
+                                        <i class="fas fa-check"></i>
+                                    </a>
+                                {% endif %}
+
+                                <button type="button"
+                                        class="btn btn-danger btn-sm delete-btn"
+                                        data-url="{% url 'student_delete' s.id %}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+        {% else %}
+            <p class="text-center text-muted py-4 mb-0">No students found</p>
+        {% endif %}
+    </div>
+
+</div>
+</div>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<style>
+.student-img{
+    width:45px;
+    height:45px;
+    border-radius:8px;
+    object-fit:cover;
+}
+.action-btns{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<!-- IMPORTANT: jQuery load mat karo agar base template me already hai -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+$(function () {
+
+    // DataTable init
+    let table = $('#students-table').DataTable({
+        pageLength: 10,
+        responsive: true,
+        paging: true,
+        searching: true,
+        ordering: true
+    });
+
+    // Delete confirm
+    $(".delete-btn").on("click", function () {
+        let url = $(this).data("url");
+
+        Swal.fire({
+            title: "Delete student?",
+            text: "This action cannot be undone",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete",
+            cancelButtonText: "Cancel"
+        }).then((r) => {
+            if (r.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    });
+
+    // Download button
+    $("#downloadCardsBtn").on("click", function () {
+        let q = table.search();
+        window.location.href =
+            "{% url 'download_all_cards_page' %}?search=" + encodeURIComponent(q);
+    });
+
+});
+</script>
+{% endblock %}

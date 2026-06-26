@@ -1,0 +1,644 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Admin Dashboard</title>
+
+    <!-- Bootstrap 4.6 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Modern Calm Animated Background --- */
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* Calm Blue & Teal Gradient */
+            background: linear-gradient(-45deg, #1a365d, #2d3748, #2c5282, #2b6cb0);
+            background-size: 400% 400%;
+            animation: gradientBG 18s ease infinite;
+            overflow-x: hidden;
+            color: #333;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- Modern Glassmorphism Sidebar --- */
+        #sidebar-wrapper {
+            min-height: 100vh;
+            width: 260px;
+            margin-left: -260px;
+            /* Deep Blue Gradient */
+            background: linear-gradient(135deg, rgba(26, 54, 93, 0.95) 0%, rgba(45, 55, 72, 0.98) 100%);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            transition: margin 0.25s ease-out;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 1000;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.3);
+            overflow-y: auto;
+        }
+
+        #sidebar-wrapper .sidebar-heading {
+            padding: 1.5rem;
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #sidebar-wrapper .list-group {
+            width: 100%;
+            padding: 20px 10px;
+        }
+
+        /* --- Main Sidebar Items (Pill Shape) --- */
+        #sidebar-wrapper .list-group > .list-group-item {
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* Hover Effect for Main Items */
+        #sidebar-wrapper .list-group > .list-group-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border-color: rgba(255,255,255,0.3);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            padding-left: 20px; /* Prevent padding jump */
+        }
+
+        /* Active Main Item (Modern Blue Gradient) */
+        #sidebar-wrapper .list-group > .list-group-item.active {
+            background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+            border: none;
+            color: #fff !important;
+            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.4);
+            transform: scale(1.02);
+        }
+
+        /* Icons in Main Items */
+        #sidebar-wrapper .list-group > .list-group-item i {
+            width: 25px;
+            text-align: center;
+            margin-right: 12px;
+            transition: transform 0.3s;
+            color: rgba(255,255,255,0.7);
+        }
+
+        #sidebar-wrapper .list-group > .list-group-item:hover i,
+        #sidebar-wrapper .list-group > .list-group-item.active i {
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        /* --- Submenu Styles (Tree Structure) --- */
+        .sidebar-submenu {
+            margin-left: 25px;
+            padding-left: 10px;
+            border-left: 2px solid rgba(255,255,255,0.15);
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-submenu .list-group-item {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            margin-bottom: 2px;
+            transition: all 0.2s ease;
+        }
+
+        /* Submenu Hover */
+        .sidebar-submenu .list-group-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        /* Submenu Active */
+        .sidebar-submenu .list-group-item.active {
+            background: rgba(255,255,255,0.15) !important;
+            color: #fff !important;
+            font-weight: 600;
+            box-shadow: none;
+        }
+        
+        /* Submenu Icon (Dot) */
+        .sidebar-submenu .list-group-item i {
+            font-size: 0.7rem;
+            margin-right: 10px;
+            opacity: 0.7;
+        }
+        
+        /* Chevron Rotation */
+        .submenu-icon {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            transition: transform 0.3s ease;
+        }
+        
+        a[data-toggle="collapse"]:not(.collapsed) .submenu-icon {
+            transform: rotate(90deg);
+            opacity: 1;
+            color: #fff;
+        }
+
+        /* --- Page Content Styles --- */
+        #page-content-wrapper {
+            width: 100%;
+            transition: margin 0.25s ease-out;
+            min-height: 100vh;
+        }
+
+        /* Glass Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 12px 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .navbar-brand img {
+            max-height: 40px;
+        }
+
+        /* Toggled State (Desktop) */
+        @media (min-width: 768px) {
+            #sidebar-wrapper { margin-left: 0; }
+            #page-content-wrapper { margin-left: 260px; width: calc(100% - 260px); }
+            body.toggled #sidebar-wrapper { margin-left: -260px; }
+            body.toggled #page-content-wrapper { margin-left: 0; width: 100%; }
+            .mobile-logo { display: none; }
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 767.98px) {
+            #page-content-wrapper { width: 100%; }
+            body.toggled #sidebar-wrapper { margin-left: 0; }
+            #sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; width: 100vw; height: 100vh;
+                background: rgba(0,0,0,0.5);
+                backdrop-filter: blur(3px);
+                z-index: 999;
+            }
+            body.toggled #sidebar-overlay { display: block; }
+            .navbar-brand { font-size: 1.1rem; font-weight: 600; }
+        }
+
+        /* Main Content Area */
+        .container-fluid {
+            padding: 25px;
+        }
+        
+        /* Modern Cards with Glass Hover */
+        .card {
+            border: none;
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-bottom: 25px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        /* Modern Blue Buttons */
+        .btn-custom {
+            background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 20px;
+            box-shadow: 0 4px 15px rgba(49, 130, 206, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-custom:hover {
+            color: #fff;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.6);
+        }
+        
+        /* Modern Blue Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #3182ce, #2b6cb0);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2c5282;
+        }
+
+        /* --- Card Gradients (Modern & Calm) --- */
+        .bg-primary {
+            background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%) !important;
+            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.4);
+        }
+        .bg-success {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%) !important;
+            box-shadow: 0 8px 20px rgba(56, 161, 105, 0.4);
+        }
+        .bg-info {
+            background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%) !important;
+            box-shadow: 0 8px 20px rgba(128, 90, 213, 0.4);
+        }
+        .bg-warning {
+             background: linear-gradient(135deg, #dd6b20 0%, #c05621 100%) !important;
+             color: #fff !important;
+             box-shadow: 0 8px 20px rgba(221, 107, 32, 0.4);
+        }
+        /* --- Logout Button Animations --- */
+        .logout-btn-animate {
+            position: relative;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .logout-btn-animate:hover {
+            color: #ff3b30 !important;
+            text-shadow: 0 0 10px rgba(255, 59, 48, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .logout-btn-animate i {
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .logout-btn-animate:hover i {
+            transform: translateX(5px) scale(1.2);
+        }
+
+        /* Mobile Logout Pulse */
+        .mobile-logout-animate {
+            animation: softPulse 2s infinite;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+        }
+
+        .mobile-logout-animate:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        @keyframes softPulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="d-flex" id="wrapper">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <div class="sidebar-heading">
+                <div class="logo-wrapper text-center">
+                    <img src="{% static 'image/logo1.jpg' %}" alt="Logo" class="img-fluid bg-white rounded p-1" style="max-width: 150px;">
+                </div>
+            </div>
+            <div class="list-group list-group-flush mt-3">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="fas fa-home"></i> Home
+                </a>
+
+                <!-- Student Management -->
+                <a href="#submenu1" data-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action collapsed d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-user-graduate"></i> Student Mgmt</span>
+                    <i class="fas fa-chevron-right submenu-icon"></i>
+                </a>
+                <div id="submenu1" class="collapse sidebar-submenu">
+                    <a href="{% url 'add_student' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus-circle"></i> Add Student
+                    </a>
+                    <a href="{% url 'student_list' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-list"></i> Student List
+                    </a>
+                </div>
+
+                <!-- Center Management -->
+                <a href="#submenu2" data-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action collapsed d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-building"></i> Center Mgmt</span>
+                    <i class="fas fa-chevron-right submenu-icon"></i>
+                </a>
+                <div id="submenu2" class="collapse sidebar-submenu">
+                    <a href="{% url 'add_center' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus-circle"></i> Add Center
+                    </a>
+                    <a href="{% url 'center_list' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-list"></i> Center List
+                    </a>
+                </div>
+
+                <!-- Question Management -->
+                <a href="#submenu3" data-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action collapsed d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-book-open"></i> Question Mgmt</span>
+                    <i class="fas fa-chevron-right submenu-icon"></i>
+                </a>
+                <div id="submenu3" class="collapse sidebar-submenu">
+                    <a href="{% url 'add_question' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus-circle"></i> Add Question
+                    </a>
+                    <a href="{% url 'subject_list' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-list"></i> Question List
+                    </a>
+                </div>
+
+                <!-- Exam Management -->
+                <a href="#submenu4" data-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action collapsed d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-clipboard-check"></i> Exam Mgmt</span>
+                    <i class="fas fa-chevron-right submenu-icon"></i>
+                </a>
+                <div id="submenu4" class="collapse sidebar-submenu">
+                    <a href="{% url 'add_exam' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus-circle"></i> Add Exam
+                    </a>
+                    <a href="{% url 'exam_list' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-list"></i> Exam List
+                    </a>
+                </div>
+
+                <!-- Free Test -->
+                <a href="#submenu5" data-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action collapsed d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-star"></i> Free Test</span>
+                    <i class="fas fa-chevron-right submenu-icon"></i>
+                </a>
+                <div id="submenu5" class="collapse sidebar-submenu">
+                    <a href="{% url 'admin_free_test_buttons' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus-circle"></i> Add Free Test
+                    </a>
+                    <a href="{% url 'free_test_participants' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-users"></i> Participants
+                    </a>
+                </div>
+
+                <!-- Question For Student (Exam Task) -->
+                <a href="#submenu6" data-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action collapsed d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-tasks"></i> Student Tasks</span>
+                    <i class="fas fa-chevron-right submenu-icon"></i>
+                </a>
+                <div id="submenu6" class="collapse sidebar-submenu">
+                    <a href="{% url 'exam_task_create' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus-circle"></i> Create Task
+                    </a>
+                    <a href="{% url 'exam_task_list' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-list"></i> Task List
+                    </a>
+                </div>
+                
+                <div class="mt-4 pb-4"></div>
+            </div>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Mobile Overlay -->
+        <div id="sidebar-overlay"></div>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+
+            <nav class="navbar navbar-expand-lg navbar-light border-bottom sticky-top">
+                <button class="btn btn-custom" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="ml-3 d-lg-none mobile-logo">
+                     <img src="{% static 'image/logo1.jpg' %}" alt="Logo" style="max-height: 40px;">
+                </div>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link text-danger font-weight-bold logout-btn-animate" href="{% url 'admin_logout' %}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Mobile Logout (Always Visible) -->
+                <a href="{% url 'admin_logout' %}" class="btn btn-danger btn-sm d-lg-none ml-auto rounded-circle d-flex align-items-center justify-content-center mobile-logout-animate" style="width: 35px; height: 35px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </nav>
+
+            <div class="container-fluid">
+                <!-- Page Title Area (Optional, consistent with child templates) -->
+                {% block content %}
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title text-primary">{{ page_title|default:"Dashboard" }}</h3>
+                                <p class="card-text text-muted">Welcome to the Admin Panel.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Widgets (Only show if not overridden by child block) -->
+                <div class="row">
+                     <!-- Example Card 1 -->
+                     <div class="col-md-3 mb-4">
+                        <div class="card text-white bg-primary h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title mb-0">Courses</h5>
+                                        <h2 class="mt-2">{{ total_course|default:"0" }}</h2>
+                                    </div>
+                                    <i class="fas fa-book fa-3x opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Example Card 2 -->
+                    <div class="col-md-3 mb-4">
+                        <div class="card text-white bg-success h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title mb-0">Students</h5>
+                                        <h2 class="mt-2">{{ total_student|default:"0" }}</h2>
+                                    </div>
+                                    <i class="fas fa-users fa-3x opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Example Card 3 -->
+                    <div class="col-md-3 mb-4">
+                        <div class="card text-white bg-info h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="card-title mb-0">Questions</h5>
+                                        <h2 class="mt-2">{{ total_question|default:"0" }}</h2>
+                                    </div>
+                                    <i class="fas fa-question-circle fa-3x opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row -->
+                    <div class="col-md-6 mb-4">
+                         <div class="card h-100">
+                             <div class="card-body">
+                                 <h5 class="card-title">Course Distribution</h5>
+                                 <canvas id="totalCoursesChart"></canvas>
+                             </div>
+                         </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                         <div class="card h-100">
+                             <div class="card-body">
+                                 <h5 class="card-title">Data Overview</h5>
+                                 <canvas id="totalStudentsAndQuestionsChart"></canvas>
+                             </div>
+                         </div>
+                    </div>
+
+                </div>
+                {% endblock %}
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Sidebar Toggle Script
+            $("#menu-toggle").click(function(e) {
+                e.preventDefault();
+                $("body").toggleClass("toggled");
+            });
+            
+            $("#sidebar-overlay").click(function() {
+                $("body").removeClass("toggled");
+            });
+            
+            // Active Link Highlighting
+            var currentUrl = window.location.href;
+            $(".list-group-item").each(function() {
+                if (this.href === currentUrl) {
+                    $(this).addClass("active");
+                    // Removed manual css manipulation to let CSS classes handle the style
+                    
+                    // If it's a submenu item, open the parent
+                    var parentSubmenu = $(this).closest('.sidebar-submenu');
+                    if (parentSubmenu.length) {
+                        parentSubmenu.addClass('show');
+                        // Find the previous element which is the toggle link
+                        parentSubmenu.prev('[data-toggle="collapse"]').removeClass('collapsed').attr('aria-expanded', 'true');
+                        // Also add active class to parent for visual feedback (optional)
+                         parentSubmenu.prev('[data-toggle="collapse"]').addClass('active');
+                    }
+                }
+            });
+        });
+
+        // Charts Initialization (Safe Check)
+        document.addEventListener("DOMContentLoaded", function () {
+            var chart1Canvas = document.getElementById('totalCoursesChart');
+            if (chart1Canvas) {
+                var ctx1 = chart1Canvas.getContext('2d');
+                new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Total Courses'],
+                        datasets: [{
+                            label: 'Courses',
+                            data: [{{ total_course|default:0 }}],
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+            }
+
+            var chart2Canvas = document.getElementById('totalStudentsAndQuestionsChart');
+            if (chart2Canvas) {
+                var ctx2 = chart2Canvas.getContext('2d');
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Students', 'Questions'],
+                        datasets: [{
+                            data: [{{ total_student|default:0 }}, {{ total_question|default:0 }}],
+                            backgroundColor: ['#4bc0c0', '#ff6384']
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+            }
+        });
+        
+        // SweetAlert Messages
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    icon: '{{ message.tags|default:"info" }}',
+                    title: '{{ message }}',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

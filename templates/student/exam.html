@@ -1,0 +1,696 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Online CBT Examination</title>
+
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f9;
+        }
+
+        /* HEADER */
+        .header {
+            height: 50px;
+            background: #0b3d91;
+            color: #fff;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timer {
+            background: #000;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* LAYOUT */
+        .container {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        .left-panel {
+            width: 70%;
+            background: #fff;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            width: 30%;
+            background: #eef1f5;
+            border-left: 1px solid #ccc;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        /* QUESTION */
+        .question {
+            font-size: 18px;
+            font-weight: normal;
+            margin-bottom: 15px;
+        }
+
+        .option {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #fff;
+        }
+
+        .option:hover {
+            background: #f8f9fa;
+        }
+
+        .option label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        /* BUTTONS */
+        .btn-row { margin-top: 20px; }
+
+        .btn {
+            padding: 10px 14px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 6px;
+            font-weight: bold;
+        }
+
+        .btn-save {
+            background: #28a745;
+            color: #fff;
+        }
+        .btn-save:hover { background: #218838; }
+
+        .btn-review {
+            background: #6f42c1;
+            color: #fff;
+        }
+        .btn-review:hover { background: #5a32a3; }
+
+        .btn-clear {
+            background: #dc3545;
+            color: #fff;
+        }
+        .btn-clear:hover { background: #c82333; }
+
+        .btn-submit {
+            width: 100%;
+            background: #000;
+            color: #fff;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-submit:hover {
+            background: #333;
+        }
+
+        /* PALETTE */
+        .subject-title {
+            font-weight: bold;
+            margin: 12px 0 6px;
+            color: #333;
+            font-size: 14px;
+            padding-left: 5px;
+        }
+
+        .palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .palette button {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .palette button:hover {
+            transform: scale(1.1);
+        }
+
+        /* CORRECTED COLOR CLASSES */
+        .not-visited {
+            background: #bdbdbd;  /* Grey */
+            color: #333;
+        }
+        .visited {
+            background: #007bff;  /* Blue */
+        }
+        .answered {
+            background: #28a745;  /* Green */
+        }
+        .marked {
+            background: #6f42c1;  /* Purple */
+        }
+        .answered-marked {
+            background: #ff9800;  /* Orange */
+            color: #000;
+        }
+
+        /* =============================
+           ✅ UPDATED SUMMARY BOX DESIGN
+           ============================= */
+        #summary {
+            margin-bottom: 15px;
+        }
+
+        .status-box{
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .status-title{
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 10px;
+            color: #0b3d91;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-total{
+            background: #eef4ff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #000;
+            border: 1px solid #d9e5ff;
+            margin-bottom: 10px;
+        }
+
+        .status-row{
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #000;   /* ✅ TEXT BLACK */
+            border: 1px solid rgba(0,0,0,0.12);
+        }
+
+        .answered-box{
+            background: rgba(40,167,69,0.18);
+            border-color: rgba(40,167,69,0.55);
+        }
+
+        .marked-box{
+            background: rgba(111,66,193,0.18);
+            border-color: rgba(111,66,193,0.55);
+        }
+
+        .visited-box{
+            background: rgba(0,123,255,0.18);
+            border-color: rgba(0,123,255,0.55);
+        }
+
+        .notvisited-box{
+            background: rgba(189,189,189,0.35);
+            border-color: rgba(189,189,189,0.75);
+        }
+
+        /* LEGEND NOTE */
+        .legend-note {
+            font-size: 13px;
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+            padding-left: 5px;
+        }
+
+
+        /* ✅ Mobile Responsive */
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+                min-height: calc(100vh - 50px);
+            }
+
+            .left-panel, .right-panel {
+                width: 100%;
+                height: auto;
+            }
+
+            .right-panel {
+                border-left: none;
+                border-top: 1px solid #ccc;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                height: auto;
+                padding: 10px 12px;
+                gap: 10px;
+                flex-wrap: wrap;
+                position: sticky;
+                top: 0;
+                z-index: 999;
+            }
+
+            .left-panel {
+                padding: 14px;
+            }
+
+            .right-panel {
+                padding: 12px;
+            }
+
+            .question {
+                font-size: 16px;
+                line-height: 1.4;
+            }
+
+            .option {
+                padding: 12px;
+            }
+
+            .btn-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                margin-right: 0;
+                padding: 12px 10px;
+                font-size: 13px;
+            }
+
+            .palette button {
+                width: 40px;
+                height: 40px;
+                font-size: 13px;
+                border-radius: 6px;
+            }
+
+            .btn-submit {
+                border-radius: 8px;
+                padding: 14px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .btn-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+
+    <!-- SECURITY -->
+    <script>
+        history.pushState(null, null, location.href);
+        window.onpopstate = () => history.go(1);
+
+        function examUnloadWarning(e) {
+            e.preventDefault();
+            e.returnValue = "Exam is in progress.";
+        }
+        window.addEventListener("beforeunload", examUnloadWarning);
+    </script>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div>
+        <b>{{ attempt.exam.name }}</b><br>
+        <small>Candidate: {{ attempt.student.name }}</small>
+    </div>
+    <div class="timer" id="timer">Loading…</div>
+</div>
+
+<div class="container">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+        <div id="questionBox"></div>
+
+        <div class="btn-row">
+            <button class="btn btn-save" onclick="saveAnswer(false)">
+                <i class="fas fa-save"></i> Save & Next
+            </button>
+
+            <button class="btn btn-review" onclick="saveAnswer(true)">
+                <i class="fas fa-flag"></i> Mark for Review
+            </button>
+
+            <button class="btn btn-clear" onclick="clearAnswer()">
+                <i class="fas fa-times"></i> Clear Response
+            </button>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+        <div id="summary"></div>
+
+        <!-- PALETTE LEGEND -->
+        <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #ddd;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                <i class="fas fa-th-large" style="color: #0b3d91;"></i>
+                <span style="font-weight: bold;">Question Palette Legend</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #bdbdbd;"></span>
+                    <span style="font-size: 13px;">Not Visited</span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #007bff;"></span>
+                    <span style="font-size: 13px;">Visited</span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #28a745;"></span>
+                    <span style="font-size: 13px;">Answered</span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #6f42c1;"></span>
+                    <span style="font-size: 13px;">Marked</span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 6px; grid-column: span 2;">
+                    <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #ff9800;"></span>
+                    <span style="font-size: 13px;">Answered & Marked</span>
+                </div>
+            </div>
+
+            <div class="legend-note">
+                <i class="fas fa-lightbulb" style="color: #ffc107;"></i>
+                Click on palette numbers to jump directly to any question.
+            </div>
+        </div>
+
+        <div id="paletteBox"></div>
+
+        <!-- SWEETALERT SUBMIT -->
+        <form method="post" action="{% url 'submit_exam' attempt.id %}">
+            {% csrf_token %}
+            <button type="button" class="btn-submit" onclick="confirmSubmitExam()">
+                <i class="fas fa-paper-plane"></i> SUBMIT EXAM
+            </button>
+        </form>
+
+    </div>
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+/* DATA */
+const subjects = {{ subjects_json|safe }};
+const attemptId = "{{ attempt.id }}";
+let remaining = {{ remaining_seconds }};
+
+/* FLATTEN QUESTIONS */
+let flatQuestions = [];
+Object.values(subjects).forEach(list => {
+    list.forEach(q => flatQuestions.push(q));
+});
+
+let currentIndex = 0;
+
+/* PALETTE LOGIC - CORRECTED COLOR MAPPING */
+function getPaletteClass(q) {
+    // 1. Answered & Marked - Orange
+    if (q.selected && q.marked) return "answered-marked";
+    // 2. Marked for Review (but not answered) - Purple
+    if (q.marked) return "marked";
+    // 3. Answered (via Save & Next) - Green
+    if (q.selected) return "answered";
+    // 4. Visited (only seen) - Blue
+    if (q.visited) return "visited";
+    // 5. Not Visited - Grey
+    return "not-visited";
+}
+
+/* LOAD QUESTION */
+function loadQuestion(index) {
+    currentIndex = index;
+    localStorage.setItem("cbt_current_index_" + attemptId, index);
+
+    const q = flatQuestions[index];
+    q.visited = true;
+    updateSummary();
+
+    // Mark as visited in backend
+    fetch("{% url 'mark_visited' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: new URLSearchParams({
+            attempt_id: attemptId,
+            exam_question_id: q.eq_id
+        })
+    });
+
+    // Render question
+    let html = `
+    <div class="question">
+        <strong>Q${index+1}.</strong>
+        <span>${q.question}</span>
+    </div>
+    `;
+
+    for (let opt in q.options) {
+        const isChecked = q.selected === opt;
+        html += `
+        <div class="option" onclick="this.querySelector('input').click()">
+            <label>
+                <input type="radio" name="option"
+                       value="${opt}" ${isChecked?"checked":""}
+                       onchange="updateOptionSelection('${opt}')">
+                <strong>(${opt})</strong> ${q.options[opt]}
+            </label>
+        </div>`;
+    }
+    document.getElementById("questionBox").innerHTML = html;
+}
+
+/* Helper function for option selection */
+function updateOptionSelection(value) {
+    document.querySelectorAll("input[name='option']").forEach(radio => {
+        radio.checked = (radio.value === value);
+    });
+}
+
+/* SAVE ANSWER */
+function saveAnswer(reviewFlag) {
+    const selected = document.querySelector("input[name='option']:checked");
+    const selectedValue = selected ? selected.value : null;
+
+    fetch("{% url 'save_answer' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: new URLSearchParams({
+            attempt_id: attemptId,
+            exam_question_id: flatQuestions[currentIndex].eq_id,
+            option: selectedValue || "",
+            review: reviewFlag ? "1" : "0"
+        })
+    })
+    .then(() => {
+        const q = flatQuestions[currentIndex];
+        q.selected = selectedValue;
+        q.marked = reviewFlag;
+        q.visited = true;
+
+        renderPalette();
+        updateSummary();
+
+        // Auto move to next question if exists
+        if (currentIndex + 1 < flatQuestions.length) {
+            loadQuestion(currentIndex + 1);
+        }
+    });
+}
+
+/* CLEAR RESPONSE */
+function clearAnswer() {
+    document.querySelectorAll("input[name='option']").forEach(r => r.checked = false);
+
+    fetch("{% url 'save_answer' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: new URLSearchParams({
+            attempt_id: attemptId,
+            exam_question_id: flatQuestions[currentIndex].eq_id,
+            option: "",
+            review: "0"
+        })
+    })
+    .then(() => {
+        const q = flatQuestions[currentIndex];
+        q.selected = null;
+        q.marked = false;
+        q.visited = true;
+
+        renderPalette();
+        updateSummary();
+        loadQuestion(currentIndex); // Refresh current question
+    });
+}
+
+/* PALETTE RENDER */
+function renderPalette() {
+    let html = "", i = 0;
+    for (let s in subjects) {
+        html += `<div class="subject-title">${s}</div><div class="palette">`;
+        subjects[s].forEach(() => {
+            const q = flatQuestions[i];
+            html += `<button class="${getPaletteClass(q)}"
+                             onclick="loadQuestion(${i})"
+                             title="Question ${i+1}">${i+1}</button>`;
+            i++;
+        });
+        html += `</div>`;
+    }
+    document.getElementById("paletteBox").innerHTML = html;
+}
+
+/* ✅ SUMMARY (UPDATED DESIGN ONLY) */
+function updateSummary() {
+    let answered = 0, marked = 0, visited = 0;
+    flatQuestions.forEach(q => {
+        if (q.selected) answered++;
+        if (q.marked) marked++;
+        if (q.visited) visited++;
+    });
+
+    const total = flatQuestions.length;
+    const notVisited = total - visited;
+
+    document.getElementById("summary").innerHTML = `
+        <div class="status-box">
+            <div class="status-title">Exam Status</div>
+
+            <div class="status-total">
+                Total Questions: <b>${total}</b>
+            </div>
+
+            <div class="status-row answered-box">
+                Answered: <b>${answered}</b>
+            </div>
+
+            <div class="status-row marked-box">
+                Marked for Review: <b>${marked}</b>
+            </div>
+
+            <div class="status-row visited-box">
+                Visited: <b>${visited}</b>
+            </div>
+
+            <div class="status-row notvisited-box">
+                Not Visited: <b>${notVisited}</b>
+            </div>
+        </div>
+    `;
+}
+
+/* SWEETALERT SUBMIT */
+function confirmSubmitExam() {
+    let answered = 0;
+    flatQuestions.forEach(q => { if (q.selected) answered++; });
+
+    Swal.fire({
+        title: "Submit Exam?",
+        html: `<b>You have answered ${answered} out of ${flatQuestions.length} questions.</b><br><br>
+               Once submitted, you cannot change your answers.`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#000",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, Submit Exam",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            localStorage.removeItem("cbt_current_index_" + attemptId);
+            window.removeEventListener("beforeunload", examUnloadWarning);
+            document.forms[0].submit();
+        }
+    });
+}
+
+/* TIMER */
+function updateTimer() {
+    if (remaining <= 0) {
+        window.removeEventListener("beforeunload", examUnloadWarning);
+        document.forms[0].submit();
+        return;
+    }
+    let hours = Math.floor(remaining / 3600);
+    let minutes = Math.floor((remaining % 3600) / 60);
+    let seconds = remaining % 60;
+
+    let timeStr = "";
+    if (hours > 0) {
+        timeStr = `${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    } else {
+        timeStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    document.getElementById("timer").innerHTML = `<i class="fas fa-clock"></i> ${timeStr}`;
+    remaining--;
+}
+
+/* INITIALIZATION */
+renderPalette();
+updateSummary();
+updateTimer();
+setInterval(updateTimer, 1000);
+
+// Load saved question or first question
+const savedIndex = localStorage.getItem("cbt_current_index_" + attemptId);
+loadQuestion(savedIndex ? parseInt(savedIndex) : 0);
+</script>
+
+<!-- Font Awesome Icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+</body>
+</html>

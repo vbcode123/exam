@@ -1,0 +1,371 @@
+{% extends 'student/dashboard.html' %}
+{% load static %}
+
+{% block title %}My ID Card{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <!-- ✅ PAGE HEADER -->
+        <div class="app-page-title mb-4">
+            <div class="page-title-wrapper d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="page-title-heading">
+                    My Identity Card
+                    <div class="page-title-subheading">
+                        Download your Student ID Card (Front + Back)
+                    </div>
+                </div>
+
+                <!-- ✅ DOWNLOAD BUTTONS -->
+                <div class="d-flex gap-2">
+                    <button onclick="downloadIDCardFront()" class="btn btn-success">
+                        <i class="fas fa-download"></i> Download Front
+                    </button>
+
+                    <button onclick="downloadIDCardBack()" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Download Back
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ FRONT + BACK PREVIEW -->
+        <div class="row g-4 justify-content-center">
+
+            <!-- ✅ FRONT ID CARD -->
+            <div class="col-auto">
+                <div class="card shadow-sm p-4 d-flex justify-content-center align-items-center">
+                    <div id="idCardFront" class="id-card-vertical">
+
+                        <!-- ✅ TOP DESIGN -->
+                        <div class="top-design">
+                            <img src="{% static 'image/VB1.png' %}" class="logo">
+                        </div>
+
+                        <!-- ✅ PHOTO -->
+                        <div class="photo-wrapper">
+                            {% if student.photo %}
+                                <img src="{{ student.photo.url }}">
+                            {% else %}
+                                <div class="no-photo">No Photo</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- ✅ DETAILS -->
+                        <div class="details">
+
+                            {% if student.course %}
+                                <p class="course-name">{{ student.course }}</p>
+                            {% endif %}
+
+                            <h3 class="student-name">{{ student.name }}</h3>
+
+                            <p class="role">STUDENT</p>
+
+                            <div class="info">
+                                <p><strong>ID No</strong> : VB{{ student.id|stringformat:"05d" }}</p>
+                                <p><strong>Phone</strong> : {{ student.phone }}</p>
+                                <p><strong>Center</strong> : {{ student.center_name }}</p>
+                                <p class="address"><strong>Address</strong> : {{ student.address }}</p>
+                            </div>
+                        </div>
+
+                        <!-- ✅ STAMP -->
+                        <div class="stamp">
+                            <img src="{% static 'image/stamp.png' %}" alt="Stamp">
+                        </div>
+
+                        <!-- ✅ BOTTOM -->
+                        <div class="bottom-design"></div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✅ BACK ID CARD -->
+            <div class="col-auto">
+                <div class="card shadow-sm p-4 d-flex justify-content-center align-items-center">
+                    <div id="idCardBack" class="id-card-vertical">
+
+                        <!-- ✅ TOP BAR SAME AS BOTTOM -->
+                        <div class="top-bar-same"></div>
+
+                        <!-- ✅ BACK BODY -->
+                        <div class="back-body">
+
+                            <!-- ✅ TERMS HEADING -->
+                            <h3 class="back-heading">TERMS &amp; CONDITIONS</h3>
+
+                            <!-- ✅ TERMS BOX -->
+                            <div class="back-terms">
+                                <p><strong>1.</strong> This ID card must be carried during institute hours.</p>
+                                <p><strong>2.</strong> If found, please return it to the institute office.</p>
+                                <p><strong>3.</strong> In case of loss, report immediately to the institute authority.</p>
+                                <p><strong>4.</strong> This card is non-transferable and meant only for the issued student.</p>
+                            </div>
+
+                            <!-- ✅ ADDRESS TITLE -->
+                            <h4 class="back-address-title">ADDRESS</h4>
+
+                            <!-- ✅ ADDRESS BOX -->
+                            <div class="back-address">
+
+                                <p class="company-address">
+                                    {{ company_address|default:"IIT Bhubaneswar Research and Entrepreneurship Park, Bhubaneswar, Odisha 751013." }}
+                                </p>
+
+                                <p class="company-phone">
+                                    <strong>Phone:</strong> {{ company_phone|default:"9692 88 9692" }}
+                                </p>
+
+                                <p class="company-email">
+                                    <strong>Email:</strong> {{ company_email|default:"support@vidyabhaban.com" }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ✅ BOTTOM BAR -->
+                        <div class="bottom-design"></div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- ✅ html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+function downloadIDCardFront(){
+    html2canvas(document.getElementById("idCardFront"), { scale: 3 }).then(canvas => {
+        let link = document.createElement("a");
+        link.download = "{{ student.name }}_ID_Card_Front.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    });
+}
+
+function downloadIDCardBack(){
+    html2canvas(document.getElementById("idCardBack"), { scale: 3 }).then(canvas => {
+        let link = document.createElement("a");
+        link.download = "{{ student.name }}_ID_Card_Back.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    });
+}
+</script>
+
+<style>
+/* ✅ MAIN CARD */
+.id-card-vertical{
+    width:260px;
+    height:440px;
+    background:#f7f7f7;
+    border-radius:18px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 8px 25px rgba(0,0,0,0.25);
+    font-family:"Segoe UI", sans-serif;
+}
+
+/* ✅ FRONT TOP DESIGN */
+.top-design{
+    height:120px;
+    background:linear-gradient(135deg,#0b5ed7,#0dcaf0);
+    position:relative;
+}
+
+.logo{
+    height:38px;
+    position:absolute;
+    top:14px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+/* ✅ PHOTO */
+.photo-wrapper{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    background:#fff;
+    padding:5px;
+    position:absolute;
+    top:70px;
+    left:50%;
+    transform:translateX(-50%);
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+}
+
+.photo-wrapper img,
+.no-photo{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    object-fit:cover;
+    background:#ccc;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* ✅ FRONT DETAILS */
+.details{
+    margin-top:95px;
+    text-align:center;
+    padding:14px;
+}
+
+.course-name{
+    font-size:13px;
+    font-weight:900;
+    color:#dc3545;
+    letter-spacing:1.2px;
+    margin-bottom:2px;
+    text-transform:uppercase;
+}
+
+.student-name{
+    margin:2px 0;
+    font-size:18px;
+    font-weight:900;
+    letter-spacing:0.5px;
+    color:#000;
+}
+
+.role{
+    font-size:12px;
+    color:#0d6efd;
+    letter-spacing:1px;
+    margin-bottom:8px;
+}
+
+.info{
+    text-align:left;
+    font-size:12.5px;
+    line-height:1.4;
+}
+
+.info p{
+    margin:4px 0;
+}
+
+.address{
+    word-break:break-word;
+}
+
+/* ✅ STAMP */
+.stamp{
+    position:absolute;
+    bottom:30px;
+    right:15px;
+    opacity:0.85;
+}
+
+.stamp img{
+    width:75px;
+    transform:rotate(-12deg);
+}
+
+/* ✅ BOTTOM BAR */
+.bottom-design{
+    position:absolute;
+    bottom:0;
+    width:100%;
+    height:20px;
+    background:linear-gradient(135deg,#0dcaf0,#0b5ed7);
+}
+
+/* ✅ TOP BAR (BACK SIDE SAME AS BOTTOM) */
+.top-bar-same{
+    position:absolute;
+    top:0;
+    width:100%;
+    height:20px;
+    background:linear-gradient(135deg,#0dcaf0,#0b5ed7);
+}
+
+/* ========================= */
+/* ✅ BACK SIDE CONTENT */
+/* ========================= */
+.back-body{
+    position:absolute;
+    top:25px;
+    bottom:25px;
+    left:0;
+    right:0;
+    padding:12px;
+}
+
+.back-heading{
+    width:100%;
+    text-align:center;
+    font-size:14px;
+    font-weight:900;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin:0 0 8px 0;
+    color:#111;
+}
+
+.back-terms{
+    background:#ffffff;
+    border-radius:14px;
+    padding:10px 10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.12);
+    border:1px solid rgba(13,110,253,0.25);
+    font-size:11.8px;
+    line-height:1.45;
+    color:#111;
+}
+
+.back-terms p{
+    margin:7px 0;
+}
+
+.back-address-title{
+    text-align:center;
+    margin:10px 0 7px 0;
+    font-size:12.5px;
+    font-weight:900;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#111;
+}
+
+.back-address{
+    background:rgba(13,110,253,0.07);
+    border:1px dashed rgba(13,110,253,0.7);
+    border-radius:12px;
+    padding:10px 10px;
+    text-align:center;
+}
+
+.back-address .company-address{
+    margin:0 0 5px 0;
+    font-size:11.5px;
+    color:#222;
+    line-height:1.35;
+}
+
+.back-address .company-phone{
+    margin:0;
+    font-size:11.5px;
+    color:#111;
+}
+
+.back-address .company-email{
+    margin-top:5px;
+    font-size:11.5px;
+    color:#111;
+}
+</style>
+
+{% endblock %}

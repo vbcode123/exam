@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CBT Exam Instructions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body{
+            background:#eef2f6;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+        .card{
+            border-radius:10px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+        .exam-header{
+            background:#002b5c;
+            color:#fff;
+            padding:18px;
+            border-radius:10px 10px 0 0;
+        }
+        .info-box{
+            background:#f8f9fa;
+            border:1px solid #ddd;
+            border-radius:6px;
+            padding:12px;
+            height:100%;
+        }
+        .info-box h6{
+            font-size:14px;
+            color:#555;
+            margin-bottom:4px;
+        }
+        .info-box span{
+            font-size:18px;
+            font-weight:600;
+            color:#000;
+        }
+        .instruction-list li{
+            margin-bottom:8px;
+        }
+        .agree-box{
+            background:#fff3cd;
+            border:1px solid #ffeeba;
+            padding:12px;
+            border-radius:6px;
+        }
+        .ref-box{
+            background:#e7f3ff;
+            border-left:4px solid #0d6efd;
+            padding:10px;
+            border-radius:4px;
+        }
+        .start-btn{
+            font-size:18px;
+            padding:12px 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container my-5">
+
+    <div class="card">
+
+        <!-- HEADER -->
+        <div class="exam-header">
+            <h4 class="mb-1">{{ exam.name }}</h4>
+            <small>Computer Based Test (CBT)</small>
+        </div>
+
+        <div class="card-body">
+
+            <!-- ERROR -->
+            {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+
+            <!-- REFERRAL INFO -->
+            {% if request.session.ref_code %}
+            <div class="ref-box mb-3">
+                <b>Referral Applied</b><br>
+                Referral Code: <b>VBXXXX</b><br>
+                <small>Referral is optional. Exam is allowed without referral.</small>
+            </div>
+            {% endif %}
+
+            <!-- STUDENT DETAILS -->
+            <form method="post">
+                {% csrf_token %}
+
+                <h5 class="mb-3">Candidate Details</h5>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mobile Number</label>
+                        <input type="text"
+                               name="phone"
+                               class="form-control"
+                               maxlength="10"
+                               placeholder="10 digit mobile number"
+                               required>
+                        <small class="text-muted">Valid Indian mobile number only</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Address</label>
+                        <input type="text" name="address" class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- OPTIONAL REFERRAL -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Referral Code (Optional)</label>
+                        <input type="text"
+                               name="referral_code"
+                               class="form-control"
+                               placeholder="Enter referral code if any">
+                    </div>
+                </div>
+
+                <!-- EXAM SNAPSHOT -->
+                <h5 class="mb-3">Exam Overview</h5>
+
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="info-box text-center">
+                            <h6>Duration</h6>
+                            <span>{{ exam.duration_minutes }} Min</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-box text-center">
+                            <h6>Marks / Question</h6>
+                            <span>{{ exam.marks_per_question }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-box text-center">
+                            <h6>Negative Marking</h6>
+                            <span>
+                                {% if exam.negative_marking > 0 %}
+                                    {{ exam.negative_marking }}
+                                {% else %}
+                                    No
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-box text-center">
+                            <h6>Exam Mode</h6>
+                            <span>Online (CBT)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INSTRUCTIONS -->
+                <h5 class="mb-3">Important Instructions</h5>
+
+                <ul class="instruction-list">
+                    <li>The examination is a Computer Based Test (CBT).</li>
+                    <li>Total duration of the examination is <b>{{ exam.duration_minutes }} minutes</b>.</li>
+                    <li>The timer will start immediately after clicking <b>Start Examination</b>.</li>
+                    <li>Each question carries <b>{{ exam.marks_per_question }}</b> mark(s).</li>
+                    <li>Negative marking may be applicable as per exam rules.</li>
+                    <li>Once the exam starts, you cannot pause or restart it.</li>
+                    <li>Do not refresh, close, or navigate away from the browser.</li>
+                    <li>The exam will be <b>auto-submitted</b> when the timer ends.</li>
+                    <li>
+                        <b>Referral is optional.</b>
+                        Students can take the test even without a referral code.
+                    </li>
+                </ul>
+
+                <!-- AGREEMENT -->
+                <div class="agree-box my-4">
+                    <input type="checkbox" id="agree" onclick="toggleBtn()">
+                    <label for="agree" class="ms-2">
+                        I have read and understood all the instructions.
+                    </label>
+                </div>
+
+                <!-- START BUTTON -->
+                <div class="text-center">
+                    <button id="startBtn"
+                            type="submit"
+                            class="btn btn-success start-btn"
+                            disabled>
+                        Start Examination
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+function toggleBtn(){
+    document.getElementById("startBtn").disabled =
+        !document.getElementById("agree").checked;
+}
+</script>
+
+</body>
+</html>

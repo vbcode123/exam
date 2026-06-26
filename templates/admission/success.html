@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admission Submitted</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body{
+            margin:0;
+            padding:0;
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(135deg,#e0f7fa,#f1f8ff);
+            font-family:Segoe UI, Tahoma, sans-serif;
+        }
+
+        .card{
+            background:#fff;
+            padding:40px 35px;
+            border-radius:18px;
+            box-shadow:0 20px 40px rgba(0,0,0,.12);
+            max-width:420px;
+            width:100%;
+            text-align:center;
+            animation:fadeIn .6s ease;
+        }
+
+        @keyframes fadeIn{
+            from{opacity:0;transform:translateY(20px);}
+            to{opacity:1;transform:translateY(0);}
+        }
+
+        .icon{
+            width:90px;
+            height:90px;
+            background:#e7f6ee;
+            color:#198754;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:42px;
+            margin:0 auto 20px;
+        }
+
+        h3{
+            margin:10px 0;
+            color:#2c3e50;
+            font-size:1.6rem;
+        }
+
+        p{
+            color:#6c757d;
+            font-size:1rem;
+            line-height:1.6;
+            margin-top:10px;
+        }
+
+        .note{
+            background:#f8f9fa;
+            border-left:4px solid #0d6efd;
+            padding:12px 14px;
+            margin:20px 0;
+            font-size:.95rem;
+            color:#495057;
+            border-radius:6px;
+        }
+
+        .btn{
+            display:inline-block;
+            margin-top:20px;
+            padding:12px 26px;
+            background:#0d6efd;
+            color:#fff;
+            text-decoration:none;
+            border-radius:50px;
+            font-weight:600;
+            transition:.3s;
+        }
+
+        .btn:hover{
+            background:#084298;
+            transform:translateY(-2px);
+        }
+
+        .footer{
+            margin-top:18px;
+            font-size:.85rem;
+            color:#adb5bd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="icon">
+        <i class="fas fa-check"></i>
+    </div>
+
+    <h3>Admission Submitted Successfully</h3>
+
+    <p>
+        Thank you for submitting your admission form.<br>
+        Your details have been received.
+    </p>
+
+    <div class="note">
+        <strong>What’s next?</strong><br>
+        **Admin will review your application and approve your admission.**
+
+**Once your admission is approved, your Login Details (Phone Number & Password) will be sent to your registered WhatsApp number. Please keep your registered mobile number active and check your WhatsApp after approval.**
+
+    </div>
+
+    <a href="{% url 'home' %}" class="btn">
+        <i class="fas fa-home"></i> Back to Home
+    </a>
+
+    <div class="footer">
+        © {{ now|default:"" }} Admission Portal
+    </div>
+</div>
+
+</body>
+</html>

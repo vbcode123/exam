@@ -1,0 +1,129 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Create Exam Task{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <div class="app-page-title mb-4">
+            <div class="page-title-wrapper d-flex justify-content-between align-items-center flex-wrap">
+                <div class="page-title-heading d-flex align-items-center">
+                    <div class="page-title-icon me-3">
+                        <i class="pe-7s-plus icon-gradient bg-plum-plate"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">Create New Exam Task</h4>
+                        <div class="page-title-subheading">
+                            Assign an existing exam to a new task entry.
+                        </div>
+                    </div>
+                </div>
+                <div class="page-title-actions">
+                    <a href="{% url 'exam_task_list' %}" class="btn btn-secondary shadow-sm">
+                        <i class="fas fa-list me-1"></i> View All Tasks
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-lg">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0 py-2">Task Details</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-6 border-end pe-md-4">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Task Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fas fa-edit text-primary"></i></span>
+                                    <input type="text" name="task_name" class="form-control" placeholder="e.g. Weekly Mock Test - Jan" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Task Created At</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fas fa-calendar-alt text-primary"></i></span>
+                                    <input type="datetime-local" name="created_at" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 ps-md-4">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-success">Select Exam</label>
+                                <select id="examSelect" name="exam" class="form-select form-control-lg border-success" style="cursor: pointer;" required>
+                                    <option value="">-- Choose an Exam --</option>
+                                    {% for e in exams %}
+                                    <option 
+                                        value="{{ e.id }}"
+                                        data-duration="{{ e.duration_minutes }}"
+                                        data-marks="{{ e.marks_per_question }}"
+                                        data-negative="{{ e.negative_marking }}"
+                                    >
+                                        {{ e.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="exam-info-box p-3 bg-light rounded border">
+                                <h6 class="text-muted small text-uppercase fw-bold mb-3">Exam Configuration (Read-only)</h6>
+                                <div class="row g-2">
+                                    <div class="col-4">
+                                        <label class="small text-muted">Duration</label>
+                                        <input type="text" id="duration" class="form-control form-control-sm bg-white" placeholder="--" readonly>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="small text-muted">Marks / Q</label>
+                                        <input type="text" id="marks" class="form-control form-control-sm bg-white" placeholder="--" readonly>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="small text-muted">Negative</label>
+                                        <input type="text" id="negative" class="form-control form-control-sm bg-white" placeholder="--" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="text-end">
+                        <button type="reset" class="btn btn-link text-muted me-3 text-decoration-none">Clear Form</button>
+                        <button type="submit" class="btn btn-primary btn-lg px-5 shadow">
+                            <i class="fas fa-check-circle me-1"></i> Create Task Now
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.getElementById("examSelect").addEventListener("change", function () {
+        let opt = this.options[this.selectedIndex];
+        // Populate fields or clear if none selected
+        document.getElementById("duration").value = (opt.value) ? opt.dataset.duration + " Min" : "";
+        document.getElementById("marks").value = (opt.value) ? opt.dataset.marks : "";
+        document.getElementById("negative").value = (opt.value) ? opt.dataset.negative : "";
+    });
+</script>
+
+<style>
+    .form-label { font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .card { border-radius: 15px !important; }
+    .input-group-text { border-right: none; }
+    .form-control { border-left: none; }
+    .form-control:focus { box-shadow: none; border-color: #ced4da; }
+    .exam-info-box { border-style: dashed !important; }
+</style>
+{% endblock %}

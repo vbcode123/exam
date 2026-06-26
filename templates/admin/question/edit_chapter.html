@@ -1,0 +1,187 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- PAGE HEADER -->
+    <div class="app-page-title mb-4">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-note2 icon-gradient bg-mean-fruit"></i>
+                </div>
+                <div>
+                    Edit Chapter
+                    <div class="page-title-subheading">
+                        {{ chapter.subject.name }} → {{ chapter.name }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM START -->
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- CHAPTER NAME -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <label class="fw-bold mb-2">Chapter Name</label>
+                <input type="text"
+                       name="chapter_name"
+                       value="{{ chapter.name }}"
+                       class="form-control form-control-lg"
+                       required>
+            </div>
+        </div>
+
+        <!-- EXISTING QUESTIONS -->
+        {% for q in questions %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+
+                <h6 class="fw-bold mb-3">
+                    Question {{ forloop.counter }}
+                </h6>
+
+                <textarea name="question_{{ q.id }}"
+                          class="form-control mb-2"
+                          rows="3"
+                          required>{{ q.question }}</textarea>
+
+                <input type="text"
+                       name="option_a_{{ q.id }}"
+                       value="{{ q.option_a }}"
+                       class="form-control mb-1"
+                       placeholder="Option A"
+                       required>
+
+                <input type="text"
+                       name="option_b_{{ q.id }}"
+                       value="{{ q.option_b }}"
+                       class="form-control mb-1"
+                       placeholder="Option B"
+                       required>
+
+                <input type="text"
+                       name="option_c_{{ q.id }}"
+                       value="{{ q.option_c }}"
+                       class="form-control mb-1"
+                       placeholder="Option C"
+                       required>
+
+                <input type="text"
+                       name="option_d_{{ q.id }}"
+                       value="{{ q.option_d }}"
+                       class="form-control mb-2"
+                       placeholder="Option D"
+                       required>
+
+                <select name="correct_{{ q.id }}"
+                        class="form-select"
+                        required>
+                    <option value="A" {% if q.correct_answer == 'A' %}selected{% endif %}>Option A</option>
+                    <option value="B" {% if q.correct_answer == 'B' %}selected{% endif %}>Option B</option>
+                    <option value="C" {% if q.correct_answer == 'C' %}selected{% endif %}>Option C</option>
+                    <option value="D" {% if q.correct_answer == 'D' %}selected{% endif %}>Option D</option>
+                </select>
+
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-warning">
+            No questions found in this chapter.
+        </div>
+        {% endfor %}
+
+        <!-- ADD MULTIPLE NEW QUESTIONS -->
+        <div class="card border-success shadow-sm mb-4">
+            <div class="card-body">
+
+                <h5 class="fw-bold text-success mb-3">
+                    ➕ Add New Questions
+                </h5>
+
+                <div id="new-question-wrapper">
+
+                    <!-- ONE QUESTION BLOCK -->
+                    <div class="new-question-block border rounded p-3 mb-3">
+
+                        <textarea name="new_question[]"
+                                  class="form-control mb-2"
+                                  rows="2"
+                                  placeholder="New Question"></textarea>
+
+                        <input type="text"
+                               name="new_option_a[]"
+                               class="form-control mb-1"
+                               placeholder="Option A">
+
+                        <input type="text"
+                               name="new_option_b[]"
+                               class="form-control mb-1"
+                               placeholder="Option B">
+
+                        <input type="text"
+                               name="new_option_c[]"
+                               class="form-control mb-1"
+                               placeholder="Option C">
+
+                        <input type="text"
+                               name="new_option_d[]"
+                               class="form-control mb-2"
+                               placeholder="Option D">
+
+                        <select name="new_correct[]" class="form-select">
+                            <option value="">Correct Answer</option>
+                            <option value="A">Option A</option>
+                            <option value="B">Option B</option>
+                            <option value="C">Option C</option>
+                            <option value="D">Option D</option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn btn-outline-success btn-sm"
+                        onclick="addQuestionBlock()">
+                    + Add Another Question
+                </button>
+
+            </div>
+        </div>
+
+        <!-- SAVE BUTTON -->
+        <div class="text-center mb-5">
+            <button type="submit"
+                    class="btn btn-success btn-lg px-5">
+                💾 Save All Changes
+            </button>
+        </div>
+
+    </form>
+    <!-- FORM END -->
+
+</div>
+</div>
+
+<!-- JS -->
+<script>
+function addQuestionBlock() {
+    const wrapper = document.getElementById("new-question-wrapper");
+    const first = wrapper.querySelector(".new-question-block");
+    const clone = first.cloneNode(true);
+
+    clone.querySelectorAll("input, textarea, select").forEach(el => {
+        el.value = "";
+    });
+
+    wrapper.appendChild(clone);
+}
+</script>
+{% endblock %}

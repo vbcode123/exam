@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Student Admission</title>
+
+<style>
+body{
+background:#eef3ff;
+font-family:sans-serif;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.card{
+background:white;
+padding:30px;
+width:400px;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,.15);
+}
+
+input, textarea{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#0066ff;
+color:white;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Student Admission</h2>
+
+<form id="admissionForm" method="post" enctype="multipart/form-data">
+{% csrf_token %}
+
+<input name="name" placeholder="Full Name" required>
+<input name="phone" placeholder="Phone" required>
+<input name="email" placeholder="Email" required>
+<input name="course" placeholder="Course">
+<input name="center_name" placeholder="Center">
+<textarea name="address" placeholder="Address"></textarea>
+<input type="password" name="password" placeholder="Password" required>
+<input type="file" name="photo" required>
+
+<button type="submit">Submit Admission</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

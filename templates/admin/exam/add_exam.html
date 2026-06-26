@@ -1,0 +1,19 @@
+{% extends "admin/dashboard.html" %}
+{% block content %}
+
+<div class="card col-lg-6 mx-auto p-4 shadow">
+<h4>Create Exam</h4>
+
+<form method="post">
+{% csrf_token %}
+
+<input name="name" class="form-control mb-3" placeholder="Exam Name" required>
+<input name="duration" type="number" class="form-control mb-3" placeholder="Duration (min)" required>
+<input name="marks" type="number" class="form-control mb-3" placeholder="Marks per Question" required>
+<input name="negative" type="number" step="0.25" class="form-control mb-4" placeholder="Negative Marking">
+
+<button class="btn btn-success w-100">Next</button>
+</form>
+</div>
+
+{% endblock %}

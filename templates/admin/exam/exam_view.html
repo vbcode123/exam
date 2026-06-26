@@ -1,0 +1,94 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- PAGE HEADER -->
+    <div class="app-page-title mb-4">
+        <div class="page-title-wrapper d-flex justify-content-between align-items-center">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-note2 icon-gradient bg-mean-fruit"></i>
+                </div>
+                <div>
+                    {{ exam.name }}
+                    <div class="page-title-subheading">
+                        Exam details & questions (read-only)
+                    </div>
+                </div>
+            </div>
+
+            <a href="{% url 'exam_list' %}" class="btn btn-outline-secondary">
+                ← Back to Exam List
+            </a>
+        </div>
+    </div>
+
+    <!-- EXAM INFO -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 text-center p-3">
+                <h6 class="text-muted mb-1">Duration</h6>
+                <h4 class="fw-bold">{{ exam.duration_minutes }} min</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 text-center p-3">
+                <h6 class="text-muted mb-1">Marks / Question</h6>
+                <h4 class="fw-bold">{{ exam.marks_per_question }}</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 text-center p-3">
+                <h6 class="text-muted mb-1">Negative Marking</h6>
+                <h4 class="fw-bold">{{ exam.negative_marking }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUESTIONS -->
+    {% regroup questions by subject as subject_list %}
+
+    {% for s in subject_list %}
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-light fw-bold">
+            {{ s.grouper.name }}
+            <span class="badge bg-primary ms-2">
+                {{ s.list|length }} Questions
+            </span>
+        </div>
+
+        <div class="card-body">
+
+            {% for q in s.list %}
+            <div class="border rounded-3 p-3 mb-3">
+                <div class="fw-bold mb-2">
+                    {{ forloop.counter }}. {{ q.question.question }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1">A) {{ q.question.option_a }}</p>
+                        <p class="mb-1">B) {{ q.question.option_b }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1">C) {{ q.question.option_c }}</p>
+                        <p class="mb-1">D) {{ q.question.option_d }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-warning">
+        No questions found for this exam.
+    </div>
+    {% endfor %}
+
+</div>
+</div>
+{% endblock %}

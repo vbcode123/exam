@@ -1,0 +1,84 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Student List{% endblock %}
+
+{% block content %}
+<div class="app-main">
+    <div class="app-main__outer">
+        <div class="app-main__inner">
+
+            <div class="app-page-title mb-4">
+                <div class="page-title-wrapper">
+                    <div class="page-title-heading">
+                        <div class="page-title-icon">
+                            <i class="pe-7s-users icon-gradient bg-malibu-beach"></i>
+                        </div>
+                        <div>
+                            Student List
+                            <div class="page-title-subheading">
+                                Center Panel > Student List
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-card mb-3 card shadow-sm">
+                <div class="card-body">
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle text-center">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Course</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for s in students %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ s.name }}</td>
+                                    <td>{{ s.phone }}</td>
+                                    <td>{{ s.course }}</td>
+                                    <td>
+                                        <a href="{% url 'center_student_view' s.id %}" class="btn btn-sm btn-primary">View</a>
+                                        <a href="{% url 'center_student_edit' s.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="{% url 'center_student_delete' s.id %}"
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Delete this student?')">
+                                            Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5">No students found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

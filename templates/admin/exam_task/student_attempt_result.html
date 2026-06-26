@@ -1,0 +1,506 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Student Result - {{ attempt.student.name }}{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <!-- ================= MODERN TOP HEADER ================= -->
+        <div class="result-top mb-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="result-icon">
+                        <i class="pe-7s-note2"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-1 fw-bold text-white">Student Result</h3>
+                        <div class="text-white-50">
+                            <span class="text-white fw-semibold">{{ attempt.student.name }}</span>
+                            • {{ attempt.student.phone }}
+                        </div>
+                        <div class="text-white-50 mt-1">
+                            Exam: <span class="text-white fw-semibold">{{ attempt.exam.name }}</span>
+                            &nbsp;•&nbsp;
+                            Task: <span class="text-white fw-semibold">{{ attempt.task.task_name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <button onclick="window.print();" class="btn btn-light rounded-pill px-4 shadow-sm">
+                        <i class="fas fa-print me-2"></i> Export PDF
+                    </button>
+
+                    <a href="{% url 'exam_task_students' attempt.task.id %}"
+                       class="btn btn-dark rounded-pill px-4 shadow-sm">
+                        <i class="fas fa-arrow-left me-2"></i> Back
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= SUMMARY CARDS ================= -->
+        <div class="row g-3 mb-3">
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label">Total Questions</div>
+                            <div class="stat-value">{{ total }}</div>
+                        </div>
+                        <div class="stat-icon dark">
+                            <i class="fas fa-list"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label">Correct</div>
+                            <div class="stat-value text-success">{{ correct }}</div>
+                        </div>
+                        <div class="stat-icon success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label">Wrong</div>
+                            <div class="stat-value text-danger">{{ wrong }}</div>
+                        </div>
+                        <div class="stat-icon danger">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label">Unattempted</div>
+                            <div class="stat-value text-warning">{{ unattempted }}</div>
+                        </div>
+                        <div class="stat-icon warning">
+                            <i class="fas fa-minus"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= SCORE CARD ================= -->
+        <div class="modern-box mb-3">
+            <div class="modern-box-body">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h5 class="mb-1 fw-bold">Final Score</h5>
+                        <div class="text-muted small">
+                            Student obtained marks with negative marking ✅
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="pill pill-primary">
+                            <i class="fas fa-award me-1"></i> Obtained: {{ obtained }}
+                        </span>
+                        <span class="pill pill-dark">
+                            <i class="fas fa-flag-checkered me-1"></i> Max: {{ max_marks }}
+                        </span>
+                        <span class="pill pill-success">
+                            <i class="fas fa-chart-line me-1"></i> {{ percentage }}%
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Performance</span>
+                        <span>{{ percentage }}%</span>
+                    </div>
+
+                    <div class="progress modern-progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{ percentage }}%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= QUESTIONS LIST (MODERN TABLE) ================= -->
+        <div class="modern-box">
+            <div class="modern-box-header">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="mini-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">Question Wise Report</div>
+                            <div class="small text-muted">Answer sheet with correct answers</div>
+                        </div>
+                    </div>
+
+                    <span class="badge bg-primary-subtle text-primary border rounded-pill px-3 py-2">
+                        Total: {{ total }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="table-responsive p-2">
+                <table class="table modern-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 60px;">#</th>
+                            <th style="min-width: 380px;">Question</th>
+                            <th style="min-width: 150px;">Subject</th>
+                            <th class="text-center" style="min-width: 140px;">Your Answer</th>
+                            <th class="text-center" style="min-width: 160px;">Correct Answer</th>
+                            <th class="text-center" style="min-width: 150px;">Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for q in questions %}
+                        <tr>
+
+                            <td class="text-center text-muted fw-semibold">
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+                                <div class="fw-semibold text-dark mb-2">
+                                    {{ q.question }}
+                                </div>
+
+                                <div class="option-card">
+                                    <div><span class="opt-tag">A</span> {{ q.options.A }}</div>
+                                    <div><span class="opt-tag">B</span> {{ q.options.B }}</div>
+                                    <div><span class="opt-tag">C</span> {{ q.options.C }}</div>
+                                    <div><span class="opt-tag">D</span> {{ q.options.D }}</div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="subject-pill">
+                                    <i class="fas fa-book me-1"></i> {{ q.subject }}
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+                                {% if q.selected %}
+                                    <span class="answer-pill your-pill">{{ q.selected }}</span>
+                                {% else %}
+                                    <span class="answer-pill empty-pill">—</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                <span class="answer-pill correct-pill">{{ q.correct }}</span>
+                            </td>
+
+                            <td class="text-center">
+                                {% if q.status == "correct" %}
+                                    <span class="status-pill status-correct">
+                                        <i class="fas fa-check-circle me-1"></i> Correct
+                                    </span>
+                                {% elif q.status == "wrong" %}
+                                    <span class="status-pill status-wrong">
+                                        <i class="fas fa-times-circle me-1"></i> Wrong
+                                    </span>
+                                {% else %}
+                                    <span class="status-pill status-unattempted">
+                                        <i class="fas fa-minus-circle me-1"></i> Unattempted
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center p-4 text-muted">
+                                No data found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ================= CSS (ONLY UI) ================= -->
+<style>
+    /* Top Header */
+    .result-top {
+        border-radius: 22px;
+        padding: 18px;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #2563eb 100%);
+        box-shadow: 0 14px 32px rgba(0,0,0,0.18);
+    }
+
+    .result-icon {
+        width: 54px;
+        height: 54px;
+        display: grid;
+        place-items: center;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.18);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.2);
+        font-size: 22px;
+    }
+
+    /* Cards */
+    .stat-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 14px 16px;
+        border: 1px solid rgba(0,0,0,0.06);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        transition: 0.15s ease;
+    }
+    .stat-card:hover { transform: translateY(-2px); }
+
+    .stat-label {
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        margin-top: 2px;
+        color: #0f172a;
+    }
+
+    .stat-icon {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        font-size: 18px;
+    }
+
+    .stat-icon.dark { background: rgba(15, 23, 42, 0.08); color: #0f172a; }
+    .stat-icon.success { background: rgba(16, 185, 129, 0.14); color: #059669; }
+    .stat-icon.danger { background: rgba(239, 68, 68, 0.14); color: #dc2626; }
+    .stat-icon.warning { background: rgba(245, 158, 11, 0.16); color: #b45309; }
+
+    /* Modern box */
+    .modern-box {
+        background: #fff;
+        border-radius: 22px;
+        border: 1px solid rgba(0,0,0,0.06);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .modern-box-header {
+        padding: 14px 16px;
+        background: rgba(15, 23, 42, 0.02);
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .modern-box-body {
+        padding: 16px;
+    }
+
+    .mini-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        background: rgba(37, 99, 235, 0.12);
+        color: #2563eb;
+        font-size: 16px;
+    }
+
+    /* Pills */
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 13px;
+        border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .pill-primary { background: rgba(37, 99, 235, 0.12); color: #1d4ed8; border-color: rgba(37, 99, 235, 0.25); }
+    .pill-dark { background: rgba(15, 23, 42, 0.06); color: #0f172a; }
+    .pill-success { background: rgba(16, 185, 129, 0.14); color: #059669; border-color: rgba(16, 185, 129, 0.25); }
+
+    /* Progress */
+    .modern-progress {
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(2,6,23,0.08);
+        overflow: hidden;
+    }
+    .modern-progress .progress-bar {
+        background: linear-gradient(90deg, #2563eb, #10b981);
+        border-radius: 999px;
+    }
+
+    /* Table */
+    .modern-table thead th {
+        background: #fff !important;
+        border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+        color: #64748b;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 1px;
+        padding: 14px 12px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .modern-table tbody td {
+        border-top: 1px solid rgba(0,0,0,0.05);
+        padding: 14px 12px;
+        vertical-align: top;
+    }
+
+    .modern-table tbody tr:hover {
+        background: rgba(37,99,235,0.05);
+    }
+
+    /* Options */
+    .option-card {
+        background: rgba(2,6,23,0.03);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 16px;
+        padding: 10px 12px;
+        font-size: 13px;
+        color: #334155;
+    }
+
+    .opt-tag {
+        display: inline-flex;
+        width: 24px;
+        height: 24px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        background: rgba(37, 99, 235, 0.12);
+        border: 1px solid rgba(37,99,235,0.18);
+        color: #1d4ed8;
+        font-weight: 900;
+        margin-right: 6px;
+        font-size: 12px;
+    }
+
+    /* Subject */
+    .subject-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.04);
+        border: 1px solid rgba(0,0,0,0.06);
+        font-weight: 800;
+        font-size: 12px;
+        color: #0f172a;
+    }
+
+    /* Answer Pills */
+    .answer-pill {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 56px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-weight: 900;
+        font-size: 12px;
+        border: 1px solid transparent;
+    }
+
+    .your-pill {
+        background: rgba(37, 99, 235, 0.12);
+        color: #1d4ed8;
+        border-color: rgba(37,99,235,0.25);
+    }
+
+    .correct-pill {
+        background: rgba(16, 185, 129, 0.14);
+        color: #059669;
+        border-color: rgba(16,185,129,0.25);
+    }
+
+    .empty-pill {
+        background: rgba(100, 116, 139, 0.12);
+        color: #475569;
+        border-color: rgba(100,116,139,0.22);
+    }
+
+    /* Status Pills */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-weight: 900;
+        font-size: 12px;
+        border: 1px solid transparent;
+    }
+
+    .status-correct {
+        background: rgba(16,185,129,0.14);
+        color: #059669;
+        border-color: rgba(16,185,129,0.25);
+    }
+
+    .status-wrong {
+        background: rgba(239,68,68,0.14);
+        color: #dc2626;
+        border-color: rgba(239,68,68,0.25);
+    }
+
+    .status-unattempted {
+        background: rgba(100,116,139,0.12);
+        color: #475569;
+        border-color: rgba(100,116,139,0.22);
+    }
+
+    /* Print */
+    @media print {
+        .result-top, .btn, .app-sidebar, .app-header {
+            display: none !important;
+        }
+        .app-main__outer {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    }
+</style>
+
+{% endblock %}

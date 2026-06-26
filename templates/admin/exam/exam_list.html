@@ -1,0 +1,92 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- Page Header -->
+    <div class="app-page-title mb-4">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-note2 icon-gradient bg-mean-fruit"></i>
+                </div>
+                <div>
+                    Exam List
+                    <div class="page-title-subheading">
+                        All created exams
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Table -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:60px;">SL No</th>
+                            <th>Exam Name</th>
+                            <th>Created At</th>
+                            <th>Total Questions</th>
+                            <th style="width:220px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in exam_data %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="fw-bold">
+                                {{ row.exam.name }}
+                            </td>
+                            <td>
+                                {{ row.exam.created_at|date:"d M Y, h:i A" }}
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">
+                                    {{ row.total_questions }}
+                                </span>
+                            </td>
+                            <td>
+                                <!-- View (future) -->
+                                <a href="{% url 'exam_view' row.exam.id %}"
+                                   class="btn btn-outline-info btn-sm">
+                                    View
+                                </a>
+
+                                <!-- Edit (future) -->
+                                <a href="{% url 'exam_edit' row.exam.id %}"
+                                   class="btn btn-outline-warning btn-sm">
+                                    Edit
+                                </a>
+
+                                <!-- Delete -->
+                                <a href="{% url 'delete_exam' row.exam.id %}"
+                                   class="btn btn-outline-danger btn-sm"
+                                   onclick="return confirm('Delete this exam?')">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">
+                                No exams found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+</div>
+{% endblock %}

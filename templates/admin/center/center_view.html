@@ -1,0 +1,53 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Center View{% endblock %}
+
+{% block content %}
+<div class="app-main">
+    <div class="app-main__outer">
+        <div class="app-main__inner">
+
+            <div class="app-page-title mb-4">
+                <div class="page-title-wrapper">
+                    <div class="page-title-heading">
+                        <div class="page-title-icon">
+                            <i class="pe-7s-info icon-gradient bg-malibu-beach"></i>
+                        </div>
+                        <div>
+                            Center Details
+                            <div class="page-title-subheading">
+                                Center Dashboard > View Center
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-card mb-3 card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3">Center Information</h5>
+
+                    <p><strong>Center Name:</strong> {{ center.name }}</p>
+                    <p><strong>Phone:</strong> {{ center.phone }}</p>
+                    <p><strong>Created At:</strong> {{ center.created_at }}</p>
+
+                    <a href="{% url 'center_list' %}" class="btn btn-secondary mt-3">
+                        Back to List
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+.main-card{
+    border-radius:15px;
+    padding:2rem;
+    background:#fff;
+}
+</style>
+
+{% endblock %}

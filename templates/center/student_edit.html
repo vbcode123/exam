@@ -1,0 +1,105 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Edit Student{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <div class="app-page-title mb-4">
+            <div class="page-title-wrapper">
+                <div class="page-title-heading">
+                    <div class="page-title-icon">
+                        <i class="pe-7s-tools icon-gradient bg-malibu-beach"></i>
+                    </div>
+                    <div>
+                        Edit Student
+                        <div class="page-title-subheading">
+                            Center Panel > Edit Student
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card shadow-sm">
+            <div class="card-body">
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" id="editForm">
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Student Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ student.name }}" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            <input type="text" name="phone" class="form-control" value="{{ student.phone }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label">Course</label>
+                            <input type="text" name="course" class="form-control" value="{{ student.course }}" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Photo (Optional)</label>
+                            <input type="file" name="photo" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <label class="form-label">Address</label>
+                        <textarea name="address" class="form-control" rows="3" required>{{ student.address }}</textarea>
+                    </div>
+
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">New Password (Optional)</label>
+                            <input type="password" id="password" name="password" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" id="cpassword" name="cpassword" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            Update Student
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.getElementById("editForm").addEventListener("submit", function(e){
+    const p = document.getElementById("password").value;
+    const cp = document.getElementById("cpassword").value;
+    if(p && p !== cp){
+        e.preventDefault();
+        alert("Passwords do not match!");
+    }
+});
+</script>
+{% endblock %}

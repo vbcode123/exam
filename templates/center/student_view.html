@@ -1,0 +1,45 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}View Student{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <div class="app-page-title mb-4">
+            <div class="page-title-wrapper">
+                <div class="page-title-heading">
+                    <div class="page-title-icon">
+                        <i class="pe-7s-user icon-gradient bg-malibu-beach"></i>
+                    </div>
+                    <div>
+                        Student Details
+                        <div class="page-title-subheading">
+                            Center Panel > Student View
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm p-4" style="border-radius:16px;">
+            <p><strong>Name:</strong> {{ student.name }}</p>
+            <p><strong>Phone:</strong> {{ student.phone }}</p>
+            <p><strong>Course:</strong> {{ student.course }}</p>
+            <p><strong>Center:</strong> {{ student.center_name }}</p>
+            <p><strong>Address:</strong> {{ student.address }}</p>
+
+            {% if student.photo %}
+                <img src="{{ student.photo.url }}" style="max-width:200px;border-radius:12px;">
+            {% endif %}
+
+            <div class="mt-3">
+                <a href="{% url 'center_student_list' %}" class="btn btn-secondary">Back</a>
+                <a href="{% url 'center_student_edit' student.id %}" class="btn btn-warning">Edit</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

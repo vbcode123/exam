@@ -1,0 +1,233 @@
+{% extends "student/dashboard.html" %}
+{% load static %}
+
+{% block title %}Detailed Exam Analysis{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner exam-analysis-wrapper">
+
+    <!-- ================= FIXED SECTION ================= -->
+    <div class="fixed-top-section">
+
+        <!-- HEADER -->
+        <div class="exam-header card shadow-sm mb-2">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h5 class="mb-1 fw-bold">📊 Exam Result Analysis</h5>
+                    <small class="text-muted">
+                        {{ attempt.exam.name }} | {{ attempt.task.task_name }}
+                    </small>
+                </div>
+                <a href="{% url 'student_exam_task_list' %}" class="btn btn-sm btn-outline-secondary mt-2 mt-md-0">
+                    <i class="fas fa-arrow-left me-1"></i> Back
+                </a>
+            </div>
+        </div>
+
+        <!-- SCORE CARDS -->
+        <div class="row g-2 mb-2">
+            <div class="col-6 col-md-3">
+                <div class="stat-card total">
+                    <span>Total</span>
+                    <h4>{{ total }}</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card correct">
+                    <span>Correct</span>
+                    <h4>{{ correct }}</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card wrong">
+                    <span>Wrong</span>
+                    <h4>{{ wrong }}</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card score">
+                    <span>Score</span>
+                    <h4>{{ percentage }}%</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="pagination-bar">
+            <span class="fw-semibold">Questions</span>
+            <span class="text-muted ms-2">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+        </div>
+
+    </div>
+    <!-- ================= FIXED SECTION END ================= -->
+
+    <!-- ================= SCROLLABLE QUESTIONS ================= -->
+    <div class="questions-scroll">
+
+        {% for q in questions %}
+        <div class="question-card {% if q.status == 'correct' %}qc-correct{% elif q.status == 'wrong' %}qc-wrong{% else %}qc-skip{% endif %}">
+            
+            <div class="q-header">
+                <div>
+                    <span class="badge badge-question">Q{{ forloop.counter }}</span>
+                    <!-- ✅ QUESTION TEXT (NO DEFAULT BOLD) -->
+                    <span class="ms-1 question-text">
+                        {{ q.question|safe }}
+                    </span>
+                </div>
+                <span class="badge bg-info">{{ q.subject }}</span>
+            </div>
+
+            <div class="row mt-2">
+                {% for key, val in q.options.items %}
+                <div class="col-12 col-md-6 mb-2">
+                    <div class="option-box
+                        {% if key == q.correct %}opt-correct
+                        {% elif key == q.selected and q.status == 'wrong' %}opt-wrong{% endif %}">
+                        <strong>{{ key }}.</strong> {{ val }}
+                        {% if key == q.correct %}
+                            <i class="fas fa-check-circle float-end"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="q-footer mt-2">
+                {% if q.status == "correct" %}
+                    <span class="text-success fw-bold">✔ Correct</span>
+                {% elif q.status == "wrong" %}
+                    <span class="text-danger fw-bold">✖ Wrong</span>
+                {% else %}
+                    <span class="text-warning fw-bold">⚠ Not Attempted</span>
+                {% endif %}
+                <div class="text-muted small mt-1">
+                    Your: <b>{{ q.selected|default:"None" }}</b> |
+                    Correct: <b>{{ q.correct }}</b>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+</div>
+
+<!-- ================= CSS ================= -->
+<style>
+
+.exam-analysis-wrapper{
+    height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Fixed top */
+.fixed-top-section{
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #f4f6f9;
+    padding-bottom: 8px;
+}
+
+/* Pagination bar */
+.pagination-bar{
+    background: #fff;
+    padding: 8px 14px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.05);
+    font-size: 14px;
+}
+
+/* Scroll questions */
+.questions-scroll{
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 2px;
+}
+
+/* Header */
+.exam-header{
+    border-radius:12px;
+    padding:14px 16px;
+}
+
+/* Stat cards */
+.stat-card{
+    padding:12px;
+    border-radius:12px;
+    color:#fff;
+    text-align:center;
+    font-size:13px;
+}
+.stat-card h4{
+    margin:4px 0 0;
+    font-weight:700;
+}
+
+.stat-card.total{background:#34495e}
+.stat-card.correct{background:#2ecc71}
+.stat-card.wrong{background:#e74c3c}
+.stat-card.score{background:#9b59b6}
+
+/* Question card */
+.question-card{
+    background:#fff;
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:16px;
+    box-shadow:0 6px 16px rgba(0,0,0,.06);
+}
+
+.qc-correct{border-left:5px solid #2ecc71}
+.qc-wrong{border-left:5px solid #e74c3c}
+.qc-skip{border-left:5px solid #f1c40f}
+
+.q-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:6px;
+    font-size:14px;
+}
+
+/* ✅ IMPORTANT: question text normal by default */
+.question-text{
+    font-weight: normal;
+    font-size:14px;
+    line-height:1.5;
+}
+
+/* Options */
+.option-box{
+    background:#f8f9fa;
+    padding:8px 12px;
+    border-radius:20px;
+    border:1px solid #ddd;
+    font-size:14px;
+}
+.opt-correct{
+    background:#eafaf1;
+    border-color:#2ecc71;
+    color:#2ecc71;
+    font-weight:600;
+}
+.opt-wrong{
+    background:#fdecea;
+    border-color:#e74c3c;
+    color:#e74c3c;
+}
+
+.q-footer{
+    border-top:1px dashed #ddd;
+    padding-top:8px;
+    font-size:13px;
+}
+
+</style>
+{% endblock %}

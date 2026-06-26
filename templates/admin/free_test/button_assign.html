@@ -1,0 +1,89 @@
+{% extends "admin/dashboard.html" %}
+{% block content %}
+
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- PAGE HEADER -->
+    <div class="app-page-title mb-4">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-magic-wand icon-gradient bg-mean-fruit"></i>
+                </div>
+                <div>
+                    Free Test – Button Assignment
+                    <div class="page-title-subheading">
+                        Assign exams to Free Test buttons (A–E)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASSIGN FORM -->
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row">
+            {% for b in buttons %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm border-0 rounded-4 mb-4">
+                    <div class="card-body p-4">
+
+                        <!-- BUTTON NAME -->
+                        <h3 class="fw-bold text-center mb-3">
+                            Button {{ b.name }}
+                        </h3>
+
+                        <!-- CURRENT EXAM -->
+                        {% if b.exam %}
+                            <p class="text-success text-center fw-bold mb-2">
+                                Assigned: {{ b.exam.name }}
+                            </p>
+                        {% else %}
+                            <p class="text-danger text-center fw-bold mb-2">
+                                Not Assigned
+                            </p>
+                        {% endif %}
+
+                        <!-- EXAM DROPDOWN -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Select Exam
+                            </label>
+                            <select name="button_{{ b.name }}"
+                                    class="form-select">
+                                <option value="">-- Select Exam --</option>
+                                {% for e in exams %}
+                                <option value="{{ e.id }}"
+                                    {% if b.exam and b.exam.id == e.id %}
+                                        selected
+                                    {% endif %}>
+                                    {{ e.name }}
+                                    ({{ e.duration_minutes }} min)
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- SAVE BUTTON -->
+        <div class="text-center mt-4">
+            <button type="submit"
+                    class="btn btn-success btn-lg px-5">
+                💾 Save All Assignments
+            </button>
+        </div>
+
+    </form>
+
+</div>
+</div>
+
+{% endblock %}

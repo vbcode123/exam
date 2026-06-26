@@ -1,0 +1,206 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Attempted Students - {{ task.task_name }}{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <!-- ================= PAGE HEADER ================= -->
+        <div class="app-page-title mb-4">
+            <div class="page-title-wrapper d-flex justify-content-between align-items-center flex-wrap">
+                <div class="page-title-heading d-flex align-items-center">
+                    <div class="page-title-icon me-3">
+                        <i class="pe-7s-users icon-gradient bg-amy-crisp"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">Students Attempted</h4>
+                        <div class="page-title-subheading">
+                            Exam: <span class="fw-bold text-dark">{{ task.task_name }}</span>
+                            &nbsp;|&nbsp; Max Marks:
+                            <span class="badge bg-secondary">{{ full_marks }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-title-actions mt-2 mt-md-0">
+                    <button onclick="window.print();" class="btn btn-outline-primary me-2 shadow-sm">
+                        <i class="fas fa-print me-1"></i> Export PDF
+                    </button>
+
+                    <a href="{% url 'exam_task_list' %}" class="btn btn-secondary shadow-sm">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Tasks
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= STAT CARD ================= -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="card mb-3 widget-content bg-grow-early text-white rounded-pill">
+                    <div class="widget-content-wrapper">
+                        <div class="widget-content-left">
+                            <div class="widget-heading">Total Participants</div>
+                        </div>
+                        <div class="widget-content-right">
+                            <div class="widget-numbers">
+                                <span>{{ students|length }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TABLE CARD ================= -->
+        <div class="main-card mb-3 card shadow-sm border-0 rounded-lg overflow-hidden">
+            <div class="card-header bg-light">
+                <div class="card-header-title font-size-lg text-capitalize fw-normal text-muted">
+                    <i class="header-icon lnr-list icon-gradient bg-happy-itmeo"></i>
+                    Participant Leaderboard
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="align-middle mb-0 table table-borderless table-striped table-hover">
+                    <thead>
+                        <tr class="bg-light text-muted text-uppercase"
+                            style="font-size: 0.75rem; letter-spacing: 1px;">
+                            <th class="text-center ps-4">#</th>
+                            <th>Student Information</th>
+                            <th>Center / Branch</th>
+                            <th>Phone Number</th>
+                            <th class="text-center">Obtained Marks</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center pe-4">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for s in students %}
+                        <tr>
+                            <td class="text-center text-muted ps-4" style="width: 50px;">
+                                {{ forloop.counter }}
+                            </td>
+
+                            <!-- Student Info -->
+                            <td>
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left me-3">
+                                            <img width="40"
+                                                 class="rounded-circle border"
+                                                 src="https://ui-avatars.com/api/?name={{ s.name }}&background=random"
+                                                 alt="">
+                                        </div>
+                                        <div class="widget-content-left flex2">
+                                            <div class="widget-heading">{{ s.name }}</div>
+                                            <div class="widget-subheading opacity-7">
+                                                Attempted on:
+                                                {% if s.submitted_at %}
+                                                    {{ s.submitted_at|date:"d M Y, h:i A" }}
+                                                {% else %}
+                                                    --
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Center -->
+                            <td>
+                                <div class="badge bg-light text-dark border fw-normal px-3">
+                                    {{ s.center }}
+                                </div>
+                            </td>
+
+                            <!-- Phone -->
+                            <td class="text-muted">
+                                <i class="fas fa-phone-alt me-1 small"></i>
+                                {{ s.phone }}
+                            </td>
+
+                            <!-- Marks -->
+                            <td class="text-center">
+                                <div class="fw-bold text-primary" style="font-size: 1.1rem;">
+                                    {{ s.marks }}
+                                    <span class="text-muted fw-normal" style="font-size: 0.8rem;">
+                                        / {{ s.full_marks }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Qualified Badge -->
+                            <td class="text-center">
+                                <div class="badge rounded-pill
+                                    {% if s.marks >= full_marks|add:'-10' %}
+                                        bg-success
+                                    {% else %}
+                                        bg-info
+                                    {% endif %}
+                                ">
+                                    Qualified
+                                </div>
+                            </td>
+
+                            <!-- Action Button -->
+                            <td class="text-center pe-4">
+                                <a href="{% url 'admin_student_attempt_result' s.attempt_id %}"
+                                   class="btn btn-sm btn-primary shadow-sm rounded-pill px-3">
+                                    <i class="fas fa-eye me-1"></i> View Result
+                                </a>
+                            </td>
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center p-5">
+                                <div class="text-muted">
+                                    <i class="pe-7s-info d-block mb-2" style="font-size: 3rem;"></i>
+                                    No student has attempted this exam yet.
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer d-flex justify-content-between bg-light p-3">
+                <small class="text-muted">
+                    Report generated on: {% now "d M Y" %}
+                </small>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .card { border-radius: 15px !important; }
+    .table thead th { border: none !important; }
+    .table tbody td { vertical-align: middle !important; padding: 12px 8px; }
+    .widget-heading { font-weight: 600; color: #333; }
+    .bg-grow-early {
+        background-image: linear-gradient(to top, #0ba360 0%, #3cba92 100%) !important;
+    }
+
+    @media print {
+        .app-page-title-actions,
+        .app-sidebar,
+        .app-header,
+        .card-footer,
+        .btn {
+            display: none !important;
+        }
+        .app-main__outer {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    }
+</style>
+
+{% endblock %}

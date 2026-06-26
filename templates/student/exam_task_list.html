@@ -1,0 +1,188 @@
+{% extends "student/dashboard.html" %}
+{% load static %}
+
+{% block title %}My Exam Results{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <!-- PAGE TITLE -->
+        <div class="app-page-title mb-4">
+            <div class="page-title-wrapper d-flex justify-content-between align-items-center flex-wrap">
+                <div class="page-title-heading d-flex align-items-center">
+                    <div class="page-title-icon me-3">
+                        <i class="pe-7s-ribbon icon-gradient bg-amy-crisp"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">My Exam Results</h4>
+                        <div class="page-title-subheading">
+                            Exams you have successfully completed and submitted.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-title-actions mt-2 mt-md-0">
+                    <a href="{% url 'student_dashboard' %}" class="btn btn-secondary shadow-sm">
+                        <i class="fas fa-home me-1"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLE CARD -->
+        <div class="card shadow-sm border-0 rounded-lg">
+
+            <div class="card-header-tab card-header d-flex align-items-center justify-content-between">
+                <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                    <i class="header-icon lnr-charts icon-gradient bg-happy-itmeo"></i>
+                    Performance Summary
+                </div>
+
+                {% if result_data %}
+                <span class="badge bg-primary">
+                    Total Results: {{ result_data|length }}
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="card-body p-0">
+
+                {% if result_data %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle text-center mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="py-3">#</th>
+                                <th class="text-start py-3">Exam Details</th>
+                                <th class="py-3">Dates (Assigned/Submitted)</th>
+                                <th class="py-3">Score</th>
+                                <th class="py-3">Percentage</th>
+                                <th class="py-3">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for row in result_data %}
+                            <tr>
+                                <td class="text-muted">{{ forloop.counter }}</td>
+
+                                <!-- EXAM DETAILS -->
+                                <td class="text-start">
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left flex2">
+                                                <div class="widget-heading">
+                                                    <strong>
+                                                        {{ row.exam.name|default:"(Exam Name Not Available)" }}
+                                                    </strong>
+                                                </div>
+
+                                                <div class="widget-subheading opacity-7">
+                                                    Task:
+                                                    {{ row.task.task_name|default_if_none:"(No Task Assigned)"|default:"(No Task Assigned)" }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- DATES -->
+                                <td>
+                                    <div class="badge bg-light text-dark fw-normal border">
+                                        {{ row.assigned_at|date:"d M Y" }}
+                                    </div>
+
+                                    <div class="mt-1 small text-muted">
+                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        {{ row.submitted_at|date:"d M Y, h:i A" }}
+                                    </div>
+                                </td>
+
+                                <!-- SCORE -->
+                                <td>
+                                    <div class="fw-bold text-primary" style="font-size: 1.1rem;">
+                                        {{ row.obtained|default:"0" }}
+                                        <span class="text-muted fw-normal" style="font-size: 0.8rem;">
+                                            / {{ row.max_marks|default:"0" }}
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <!-- PERCENTAGE -->
+                                <td>
+                                    {% if row.percentage >= 50 %}
+                                        <div class="badge bg-success" style="min-width: 60px;">
+                                            {{ row.percentage|default:"0" }}%
+                                        </div>
+                                    {% else %}
+                                        <div class="badge bg-danger" style="min-width: 60px;">
+                                            {{ row.percentage|default:"0" }}%
+                                        </div>
+                                    {% endif %}
+                                </td>
+
+                                <!-- ACTION -->
+                                <td>
+                                    {% if row.attempt and row.attempt.id %}
+                                    <a href="{% url 'student_exam_result' row.attempt.id %}"
+                                       class="btn btn-sm btn-outline-primary btn-pill px-3 shadow-sm">
+                                        <i class="fas fa-file-alt me-1"></i> View Result
+                                    </a>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary btn-pill px-3 shadow-sm" disabled>
+                                        <i class="fas fa-ban me-1"></i> Not Available
+                                    </button>
+                                    {% endif %}
+                                </td>
+
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% else %}
+                <!-- EMPTY STATE -->
+                <div class="text-center p-5">
+                    <div class="mb-3">
+                        <i class="pe-7s-info text-info" style="font-size: 4rem;"></i>
+                    </div>
+                    <h5 class="mb-1">No Records Found</h5>
+                    <p class="text-muted mb-3">You haven't submitted any exams yet.</p>
+                    <a href="{% url 'available_exams' %}" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i> Check Available Exams
+                    </a>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .app-main__outer {
+        padding-left: 0;
+    }
+    .card {
+        border-radius: 12px !important;
+        overflow: hidden;
+    }
+    .table thead th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        white-space: nowrap;
+    }
+    .btn-pill {
+        border-radius: 50px !important;
+    }
+    .widget-heading {
+        font-size: 1rem;
+        color: #333;
+    }
+</style>
+{% endblock %}

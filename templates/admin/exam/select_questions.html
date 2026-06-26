@@ -1,0 +1,117 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- PAGE HEADER -->
+    <div class="app-page-title mb-4">
+        <div class="page-title-wrapper d-flex justify-content-between align-items-center">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-check icon-gradient bg-mean-fruit"></i>
+                </div>
+                <div>
+                    {{ exam.name }}
+                    <div class="page-title-subheading">
+                        Subject: {{ subject.name }}
+                    </div>
+                </div>
+            </div>
+
+            <a href="{% url 'exam_list' %}" class="btn btn-outline-secondary">
+                ← Back to Exam List
+            </a>
+        </div>
+    </div>
+
+    <!-- TARGET INFO -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 text-center p-3">
+                <h6 class="text-muted mb-1">Target Questions</h6>
+                <h4 class="fw-bold">{{ target }}</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 text-center p-3">
+                <h6 class="text-muted mb-1">Selected</h6>
+                <h4 class="fw-bold text-success">
+                    <span id="count">0</span> / {{ target }}
+                </h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 text-center p-3">
+                <h6 class="text-muted mb-1">Status</h6>
+                <h4 class="fw-bold text-info">In Progress</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUESTIONS LIST -->
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+
+            <form method="post" id="questionForm">
+                {% csrf_token %}
+
+                {% for q in questions %}
+                <div class="border rounded-3 p-3 mb-3 question-card">
+
+                    <div class="form-check mb-2">
+                        <input type="checkbox"
+                               name="question_ids"
+                               value="{{ q.id }}"
+                               class="form-check-input qcheck"
+                               id="q{{ q.id }}"
+                               onclick="updateCount()">
+
+                        <label for="q{{ q.id }}" class="form-check-label fw-bold">
+                            {{ forloop.counter }}. {{ q.question }}
+                        </label>
+                    </div>
+
+                    <div class="row ps-4">
+                        <div class="col-md-6">
+                            <p class="mb-1">A) {{ q.option_a }}</p>
+                            <p class="mb-1">B) {{ q.option_b }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1">C) {{ q.option_c }}</p>
+                            <p class="mb-1">D) {{ q.option_d }}</p>
+                        </div>
+                    </div>
+
+                </div>
+                {% empty %}
+                <div class="alert alert-warning">
+                    No questions available for this subject.
+                </div>
+                {% endfor %}
+
+                <!-- ACTION BUTTON -->
+                <div class="text-center mt-4">
+                    <button type="submit"
+                            class="btn btn-success btn-lg px-5">
+                        Save & Next Subject →
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- JS -->
+<script>
+function updateCount(){
+    const checks = document.querySelectorAll(".qcheck:checked");
+    document.getElementById("count").innerText = checks.length;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Center Login</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body{
+            background: #f5f7fb;
+        }
+        .login-card{
+            border-radius: 18px;
+            padding: 30px;
+            background: #fff;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height:100vh;">
+    <div class="col-md-5">
+
+        <div class="login-card">
+
+            <h3 class="text-center fw-bold mb-2">Center Login</h3>
+            <p class="text-center text-muted mb-4">Login using phone number and password</p>
+
+            {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone" class="form-control"
+                           placeholder="Enter 10 digit phone number"
+                           pattern="[0-9]{10}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control"
+                           placeholder="Enter password" required>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 btn-lg">
+                    Login
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

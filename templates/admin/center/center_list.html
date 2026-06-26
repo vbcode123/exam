@@ -1,0 +1,94 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Center List{% endblock %}
+
+{% block content %}
+<div class="app-main">
+    <div class="app-main__outer">
+        <div class="app-main__inner">
+
+            <!-- PAGE TITLE -->
+            <div class="app-page-title mb-4">
+                <div class="page-title-wrapper">
+                    <div class="page-title-heading">
+                        <div class="page-title-icon">
+                            <i class="pe-7s-menu icon-gradient bg-malibu-beach"></i>
+                        </div>
+                        <div>
+                            Center List
+                            <div class="page-title-subheading">
+                                Center Dashboard > Center List
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-card mb-3 card shadow-sm">
+                <div class="card-body">
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle text-center">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Center Name</th>
+                                    <th>Phone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in centers %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ c.name }}</td>
+                                    <td>{{ c.phone }}</td>
+                                    <td>
+                                        <a href="{% url 'center_view' c.id %}" class="btn btn-sm btn-primary">
+                                            View
+                                        </a>
+                                        <a href="{% url 'center_edit' c.id %}" class="btn btn-sm btn-warning">
+                                            Edit
+                                        </a>
+                                        <a href="{% url 'center_delete' c.id %}"
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Are you sure you want to delete this center?')">
+                                            Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4">No centers found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+.main-card{
+    border-radius:15px;
+    padding:2rem;
+    background:#fff;
+}
+</style>
+
+{% endblock %}

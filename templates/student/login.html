@@ -1,0 +1,399 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI", Arial, sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:url("{% static 'image/library.jpg' %}") center/cover no-repeat;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    position:relative;
+    overflow:hidden;
+}
+
+/* ✅ Dark overlay */
+body::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.55);
+    z-index:0;
+}
+
+/* ✅ COLOR BALLS LAYER */
+.color-balls{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    overflow:hidden;
+}
+
+/* ✅ Each ball base */
+.ball{
+    position:absolute;
+    bottom:-120px;
+    border-radius:50%;
+    opacity:0.75;
+    animation:flyUp 12s linear infinite;
+    filter: blur(0.2px);
+}
+
+/* ✅ Fly animation */
+@keyframes flyUp{
+    0%{
+        transform:translateY(0) translateX(0) scale(1);
+        opacity:0.2;
+    }
+    30%{
+        opacity:0.75;
+    }
+    100%{
+        transform:translateY(-120vh) translateX(60px) scale(1.25);
+        opacity:0;
+    }
+}
+
+/* ✅ DIFFERENT SIZE + COLOR + POSITIONS */
+.ball:nth-child(1){
+    width:30px;height:30px;left:10%;
+    background:rgba(255, 99, 132, 0.70);
+    animation-duration:10s;
+}
+.ball:nth-child(2){
+    width:55px;height:55px;left:22%;
+    background:rgba(54, 162, 235, 0.70);
+    animation-duration:14s;
+}
+.ball:nth-child(3){
+    width:22px;height:22px;left:35%;
+    background:rgba(255, 206, 86, 0.70);
+    animation-duration:9s;
+}
+.ball:nth-child(4){
+    width:75px;height:75px;left:48%;
+    background:rgba(75, 192, 192, 0.65);
+    animation-duration:16s;
+}
+.ball:nth-child(5){
+    width:38px;height:38px;left:58%;
+    background:rgba(153, 102, 255, 0.70);
+    animation-duration:12s;
+}
+.ball:nth-child(6){
+    width:65px;height:65px;left:70%;
+    background:rgba(255, 159, 64, 0.70);
+    animation-duration:15s;
+}
+.ball:nth-child(7){
+    width:28px;height:28px;left:82%;
+    background:rgba(0, 255, 204, 0.55);
+    animation-duration:11s;
+}
+.ball:nth-child(8){
+    width:95px;height:95px;left:92%;
+    background:rgba(0, 140, 255, 0.45);
+    animation-duration:18s;
+}
+
+/* ✅ MAIN CARD */
+.login-card{
+    width:100%;
+    max-width:1100px;
+    background:rgba(255,255,255,0.95);
+    border-radius:22px;
+    display:flex;
+    overflow:hidden;
+    box-shadow:0 18px 55px rgba(0,0,0,0.40);
+    position:relative;
+    z-index:2;
+    border:1px solid rgba(255,255,255,0.22);
+
+    animation:popIn 0.8s ease forwards;
+    transform:translateY(25px);
+    opacity:0;
+}
+
+@keyframes popIn{
+    to{
+        transform:translateY(0);
+        opacity:1;
+    }
+}
+
+/* ✅ HOME BUTTON */
+.home-btn{
+    position:absolute;
+    top:18px;
+    right:20px;
+    background:linear-gradient(90deg,#1e4fa3,#0c1f3c);
+    color:#fff;
+    text-decoration:none;
+    padding:9px 17px;
+    border-radius:25px;
+    font-size:14px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:0.25s ease;
+    box-shadow:0 10px 25px rgba(30,79,163,0.28);
+    z-index:5;
+}
+
+.home-btn:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.08);
+}
+
+/* ✅ LEFT PANEL */
+.login-image{
+    flex:1;
+    padding:38px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(135deg,#0c1f3c,#1e4fa3);
+}
+
+.login-image::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 55%);
+}
+
+.login-image img{
+    width:100%;
+    max-width:420px;
+    position:relative;
+    z-index:2;
+    animation:floatLogo 3.2s ease-in-out infinite;
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.35));
+}
+
+@keyframes floatLogo{
+    0%{ transform:translateY(0px); }
+    50%{ transform:translateY(-10px); }
+    100%{ transform:translateY(0px); }
+}
+
+/* ✅ RIGHT FORM */
+.login-form{
+    flex:1;
+    padding:60px 62px;
+    background:rgba(255,255,255,0.98);
+    animation:slideRight 0.9s ease forwards;
+    opacity:0;
+    transform:translateX(35px);
+    animation-delay:0.2s;
+}
+
+@keyframes slideRight{
+    to{
+        opacity:1;
+        transform:translateX(0);
+    }
+}
+
+.login-form h2{
+    text-align:center;
+    margin-bottom:10px;
+    font-size:28px;
+    font-weight:800;
+    color:#0c1f3c;
+    letter-spacing:1px;
+}
+
+.login-form p{
+    text-align:center;
+    color:#666;
+    font-size:14px;
+    margin-bottom:28px;
+}
+
+/* ✅ ERROR MSG */
+.error-msg{
+    background:#fdecea;
+    color:#c62828;
+    padding:12px 14px;
+    border-radius:12px;
+    text-align:center;
+    margin-bottom:18px;
+    font-size:14px;
+    border:1px solid rgba(198,40,40,0.25);
+}
+
+/* ✅ INPUTS */
+.form-group{
+    margin-bottom:18px;
+    position:relative;
+}
+
+.form-group span{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:18px;
+    color:#5d6b7a;
+}
+
+.form-group input{
+    width:100%;
+    padding:14px 16px 14px 45px;
+    border:1px solid #d5deea;
+    border-radius:12px;
+    font-size:15px;
+    outline:none;
+    transition:0.25s ease;
+    background:#fff;
+}
+
+.form-group input:focus{
+    border-color:#1e4fa3;
+    box-shadow:0 0 0 5px rgba(30,79,163,0.18);
+    transform:translateY(-1px);
+}
+
+/* ✅ BUTTON */
+.login-btn{
+    width:100%;
+    border:none;
+    padding:14px;
+    font-size:16px;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:800;
+    letter-spacing:0.4px;
+    color:#fff;
+    background:linear-gradient(90deg,#1e4fa3,#0c1f3c);
+    transition:0.25s ease;
+    box-shadow:0 14px 35px rgba(30,79,163,0.28);
+    position:relative;
+    overflow:hidden;
+}
+
+.login-btn::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-60%;
+    width:50%;
+    height:100%;
+    background:rgba(255,255,255,0.25);
+    transform:skewX(-20deg);
+    transition:0.5s ease;
+}
+
+.login-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 18px 45px rgba(30,79,163,0.40);
+}
+
+.login-btn:hover::before{
+    left:120%;
+}
+
+/* ✅ LINKS */
+.login-links{
+    margin-top:16px;
+    text-align:center;
+    font-size:14px;
+    color:#555;
+}
+
+.login-links a{
+    color:#1e4fa3;
+    text-decoration:none;
+    font-weight:700;
+    transition:0.2s ease;
+}
+.login-links a:hover{
+    text-decoration:underline;
+    color:#163b7a;
+}
+
+/* ✅ MOBILE */
+@media(max-width:768px){
+    .login-card{flex-direction:column;border-radius:18px;}
+    .login-form{padding:35px 25px;}
+    .login-image{padding:28px 15px;}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ✅ Color Balls -->
+<div class="color-balls">
+    <span class="ball"></span>
+    <span class="ball"></span>
+    <span class="ball"></span>
+    <span class="ball"></span>
+    <span class="ball"></span>
+    <span class="ball"></span>
+    <span class="ball"></span>
+    <span class="ball"></span>
+</div>
+
+<div class="login-card">
+
+    <!-- ✅ HOME BUTTON -->
+    <a href="{% url 'home' %}" class="home-btn">🏠 Home</a>
+
+    <!-- LEFT IMAGE -->
+    <div class="login-image">
+        <img src="{% static 'image/VB1.png' %}" alt="Logo">
+    </div>
+
+    <!-- RIGHT FORM -->
+    <div class="login-form">
+        <h2>STUDENT LOGIN</h2>
+        <p>Login to access your exam tasks and dashboard</p>
+
+        {% if error %}
+            <div class="error-msg">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <span>📱</span>
+                <input type="text" name="phone" placeholder="Enter Phone Number" required>
+            </div>
+
+            <div class="form-group">
+                <span>🔒</span>
+                <input type="password" name="password" placeholder="Enter Password" required>
+            </div>
+
+            <button class="login-btn" type="submit">LOGIN</button>
+
+            <div class="login-links">
+                <a href="{% url 'student_forgot' %}">Forgot Password?</a> |
+                <a href="#">Create Account</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

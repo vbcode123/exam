@@ -1,0 +1,435 @@
+{% extends 'admin/dashboard.html' %}
+{% load static %}
+
+{% block title %}Download All ID Cards{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <!-- ✅ PAGE HEADER -->
+        <div class="app-page-title mb-3">
+            <div class="page-title-wrapper d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="page-title-heading">
+                    Download Student ID Cards
+                    <div class="page-title-subheading">
+                        PNG download (Front + Back) - Address Fix ✅
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-success" onclick="downloadAllCards()">
+                        <i class="fas fa-download"></i> Download Now
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ INFO -->
+        <div class="alert alert-info">
+            {% if search_query %}
+                ✅ Search Filter: <strong>{{ search_query }}</strong> <br>
+                ✅ Total Students Found: <strong>{{ students|length }}</strong>
+            {% else %}
+                ✅ No Search Applied <br>
+                ✅ Total Students: <strong>{{ students|length }}</strong>
+            {% endif %}
+        </div>
+
+        <div class="alert alert-warning">
+            ✅ Button दबाने के बाद cards एक-एक करके download होंगे (Front + Back). <br>
+            ⚠️ Browser permission आए तो "Allow multiple downloads" जरूर करना।
+        </div>
+
+        <!-- ✅ HIDDEN CARDS AREA -->
+        <div id="cardsContainer" class="cards-hidden-area">
+
+            {% for student in students %}
+
+                <!-- ✅ FRONT CARD -->
+                <div id="front_{{ student.id }}" class="id-card-vertical">
+                    <div class="top-design">
+                        <img src="{% static 'image/VB1.png' %}" class="logo" crossorigin="anonymous" alt="Logo">
+                    </div>
+
+                    <div class="photo-wrapper">
+                        {% if student.photo %}
+                            <img src="{{ student.photo.url }}" crossorigin="anonymous" alt="Student Photo">
+                        {% else %}
+                            <div class="no-photo">No Photo</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="details">
+                        <p class="course-name">{{ student.course|default:"COURSE" }}</p>
+                        <h3 class="student-name">{{ student.name }}</h3>
+                        <p class="role">STUDENT</p>
+
+                        <div class="info">
+                            <p><strong>ID No</strong> : VB{{ student.id|stringformat:"05d" }}</p>
+                            <p><strong>Phone</strong> : {{ student.phone }}</p>
+                            <p><strong>Center</strong> : {{ student.center_name }}</p>
+                            <p class="address"><strong>Address</strong> : {{ student.address|default:"-" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="stamp">
+                        <img src="{% static 'image/stamp.png' %}" crossorigin="anonymous" alt="Stamp">
+                    </div>
+
+                    <div class="bottom-design"></div>
+                </div>
+
+                <!-- ✅ BACK CARD -->
+                <div id="back_{{ student.id }}" class="id-card-vertical">
+                    <div class="top-bar-same"></div>
+
+                    <div class="back-body">
+                        <h3 class="back-heading">TERMS &amp; CONDITIONS</h3>
+
+                        <div class="back-terms">
+                            <p><strong>1.</strong> This ID card must be carried during institute hours.</p>
+                            <p><strong>2.</strong> If found, please return it to the institute office.</p>
+                            <p><strong>3.</strong> In case of loss, report immediately to the institute authority.</p>
+                            <p><strong>4.</strong> This card is non-transferable and meant only for the issued student.</p>
+                        </div>
+
+                        <h4 class="back-address-title">ADDRESS</h4>
+
+                        <!-- ✅ FIXED ADDRESS BLOCK (ALWAYS SHOW) -->
+                        <div class="back-address">
+
+                            <p class="company-name">
+                                {% if company_name %}
+                                    {{ company_name }}
+                                {% else %}
+                                    Your Company Name
+                                {% endif %}
+                            </p>
+
+                            <p class="company-address">
+                                {% if company_address %}
+                                    {{ company_address }}
+                                {% else %}
+                                    IIT Bhubaneswar Research and Entrepreneurship Park, Bhubaneswar, Odisha 751013.
+                                {% endif %}
+                            </p>
+
+                            <p class="company-phone">
+                                <strong>Phone:</strong>
+                                {% if company_phone %}
+                                    {{ company_phone }}
+                                {% else %}
+                                    9692 88 9692
+                                {% endif %}
+                            </p>
+
+                            <p class="company-email">
+                                <strong>Email:</strong>
+                                {% if company_email %}
+                                    {{ company_email }}
+                                {% else %}
+                                    a@gmail.com
+                                {% endif %}
+                            </p>
+
+                        </div>
+                    </div>
+
+                    <div class="bottom-design"></div>
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+</div>
+
+<!-- ✅ html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+async function wait(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function downloadCanvasAsPNG(elementId, filename){
+    const el = document.getElementById(elementId);
+
+    if(!el){
+        console.log("Element not found:", elementId);
+        return;
+    }
+
+    // ✅ Extra wait for images/text render
+    await wait(800);
+
+    const canvas = await html2canvas(el, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff"   // ✅ IMPORTANT FIX
+    });
+
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    await wait(450);
+}
+
+async function downloadAllCards(){
+    try{
+        let students = [
+            {% for student in students %}
+                {
+                    id: "{{ student.id }}",
+                    name: "{{ student.name|slugify }}"
+                },
+            {% endfor %}
+        ];
+
+        if(students.length === 0){
+            alert("❌ No students available for download!");
+            return;
+        }
+
+        alert("✅ Download Start हो रहा है...\nBrowser permission आए तो 'Allow multiple downloads' कर देना!");
+
+        for(let s of students){
+            await downloadCanvasAsPNG("front_" + s.id, s.name + "_FRONT.png");
+            await downloadCanvasAsPNG("back_" + s.id, s.name + "_BACK.png");
+        }
+
+        alert("✅ Download Completed Successfully!");
+    }catch(err){
+        console.log(err);
+        alert("❌ Download Error! Console check करो (F12).");
+    }
+}
+</script>
+
+<style>
+/* ✅ IMPORTANT FIX */
+.cards-hidden-area{
+    position: fixed;
+    left: -99999px;
+    top: 0;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ✅ MAIN CARD */
+.id-card-vertical{
+    width:260px;
+    height:440px;
+    background:#f7f7f7;
+    border-radius:18px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 8px 25px rgba(0,0,0,0.25);
+    font-family:"Segoe UI", sans-serif;
+    margin:10px;
+}
+
+/* ✅ FRONT TOP DESIGN */
+.top-design{
+    height:120px;
+    background:linear-gradient(135deg,#0b5ed7,#0dcaf0);
+    position:relative;
+}
+
+.logo{
+    height:38px;
+    position:absolute;
+    top:14px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+/* ✅ PHOTO */
+.photo-wrapper{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    background:#fff;
+    padding:5px;
+    position:absolute;
+    top:70px;
+    left:50%;
+    transform:translateX(-50%);
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+}
+
+.photo-wrapper img,
+.no-photo{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    object-fit:cover;
+    background:#ccc;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* ✅ FRONT DETAILS */
+.details{
+    margin-top:95px;
+    text-align:center;
+    padding:14px;
+}
+
+.course-name{
+    font-size:13px;
+    font-weight:900;
+    color:#dc3545;
+    letter-spacing:1.2px;
+    margin-bottom:2px;
+    text-transform:uppercase;
+}
+
+.student-name{
+    margin:2px 0;
+    font-size:18px;
+    font-weight:900;
+    letter-spacing:0.5px;
+}
+
+.role{
+    font-size:12px;
+    color:#0d6efd;
+    letter-spacing:1px;
+    margin-bottom:8px;
+}
+
+.info{
+    text-align:left;
+    font-size:12.5px;
+    line-height:1.4;
+}
+
+.info p{
+    margin:4px 0;
+}
+
+.address{
+    word-break:break-word;
+}
+
+/* ✅ STAMP */
+.stamp{
+    position:absolute;
+    bottom:30px;
+    right:15px;
+    opacity:0.85;
+}
+
+.stamp img{
+    width:75px;
+    transform:rotate(-12deg);
+}
+
+/* ✅ BOTTOM BAR */
+.bottom-design{
+    position:absolute;
+    bottom:0;
+    width:100%;
+    height:20px;
+    background:linear-gradient(135deg,#0dcaf0,#0b5ed7);
+}
+
+/* ✅ BACK TOP BAR */
+.top-bar-same{
+    position:absolute;
+    top:0;
+    width:100%;
+    height:20px;
+    background:linear-gradient(135deg,#0dcaf0,#0b5ed7);
+}
+
+.back-body{
+    position:absolute;
+    top:25px;
+    bottom:25px;
+    left:0;
+    right:0;
+    padding:12px;
+}
+
+.back-heading{
+    width:100%;
+    text-align:center;
+    font-size:14px;
+    font-weight:900;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin:0 0 8px 0;
+    color:#111;
+}
+
+.back-terms{
+    background:#ffffff;
+    border-radius:14px;
+    padding:10px 10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.12);
+    border:1px solid rgba(13,110,253,0.25);
+    font-size:11.8px;
+    line-height:1.45;
+    color:#111;
+}
+
+.back-terms p{
+    margin:7px 0;
+}
+
+.back-address-title{
+    text-align:center;
+    margin:10px 0 7px 0;
+    font-size:12.5px;
+    font-weight:900;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#111;
+}
+
+.back-address{
+    background:rgba(13,110,253,0.07);
+    border:1px dashed rgba(13,110,253,0.7);
+    border-radius:12px;
+    padding:10px 10px;
+    text-align:center;
+}
+
+.back-address .company-name{
+    margin:0 0 4px 0;
+    font-size:12px;
+    font-weight:900;
+    color:#0b5ed7;
+}
+
+.back-address .company-address{
+    margin:0 0 5px 0;
+    font-size:11.5px;
+    color:#222;
+    line-height:1.35;
+}
+
+.back-address .company-phone{
+    margin:0;
+    font-size:11.5px;
+    color:#111;
+}
+
+.back-address .company-email{
+    margin-top:5px;
+    font-size:11.5px;
+    color:#111;
+}
+</style>
+
+{% endblock %}

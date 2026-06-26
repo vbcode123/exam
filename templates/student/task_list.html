@@ -1,0 +1,58 @@
+{% extends "student/dashboard.html" %}
+{% block content %}
+
+<div class="app-main__inner">
+
+    <h4 class="mb-4">Task List (Completed Exams)</h4>
+
+    {% if attempts %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>Exam Name</th>
+                    <th>Attempt Date</th>
+                    <th>Total Marks</th>
+                    <th style="width:150px;">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for attempt in attempts %}
+                <tr>
+                    <td class="text-start fw-bold">
+                        {{ attempt.exam.name }}
+                    </td>
+
+                    <td>
+                        {{ attempt.submitted_at|date:"d M Y, h:i A" }}
+                    </td>
+
+                    <td>
+                        {{ attempt.exam.total_questions|default:"—" }}
+                        × {{ attempt.exam.marks_per_question }}
+                        =
+                        {{ attempt.exam.total_questions|default:0|add:0|floatformat:0 }}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'exam_result' attempt.id %}"
+                           class="btn btn-info btn-sm">
+                            View Result
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+        <div class="alert alert-info text-center">
+            No completed exams found.
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

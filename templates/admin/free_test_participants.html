@@ -1,0 +1,244 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Free Test Participants{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <div class="app-page-title mb-4 bg-white shadow-sm p-4" style="border-radius: 15px; border-left: 5px solid #3f6ad8;">
+            <div class="page-title-wrapper">
+                <div class="page-title-heading">
+                    <div class="page-title-icon text-white shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="pe-7s-users"></i>
+                    </div>
+                    <div>
+                        <span class="fw-bold" style="letter-spacing: -0.5px; font-size: 1.5rem;">Free Test Participants</span>
+                        <div class="page-title-subheading text-muted mt-1">
+                             <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0 bg-transparent p-0">
+                                    <li class="breadcrumb-item">Dashboard</li>
+                                    <li class="breadcrumb-item">Examinations</li>
+                                    <li class="breadcrumb-item active text-primary">Participant List</li>
+                                </ol>
+                             </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div id="export-buttons-container" class="d-flex flex-wrap gap-2"></div>
+
+            <div class="total-badge shadow-sm">
+                <i class="fa fa-users me-2"></i>
+                Total Participants: <span class="counter-value">{{ participants|length }}</span>
+            </div>
+        </div>
+
+        <div class="main-card mb-5 card shadow-sm d-none d-md-block border-0" style="border-radius: 20px; overflow: hidden;">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table id="participantTable" class="table table-hover align-middle mb-0 w-100">
+                        <thead>
+                            <tr>
+                                <th class="text-center py-4 border-0">#</th>
+                                <th class="border-0">Exam Details</th>
+                                <th class="border-0">Candidate Info</th>
+                                <th class="border-0">Contact</th>
+                                <th class="border-0">Location</th>
+                                <th class="text-center border-0">Attempted On</th>
+                                <th class="text-center border-0">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in participants %}
+                            <tr>
+                                <td class="text-center"><span class="fw-bold text-muted">{{ forloop.counter }}</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="exam-dot me-2"></div>
+                                        <span class="fw-bold text-dark">{{ p.exam.name }}</span>
+                                    </div>
+                                </td>
+                                <td><span class="fw-bold text-primary">{{ p.candidate_name }}</span></td>
+                                <td>
+                                    <div class="contact-pill shadow-none border">
+                                        <i class="fa fa-phone text-success me-1"></i> {{ p.candidate_phone }}
+                                    </div>
+                                </td>
+                                <td><small class="text-muted"><i class="fa fa-map-marker-alt me-1 text-danger"></i> {{ p.candidate_address|truncatechars:30 }}</small></td>
+                                <td class="text-center">
+                                    <div class="fw-bold">{{ p.started_at|date:"d M, Y" }}</div>
+                                    <div class="small text-muted opacity-75">{{ p.started_at|date:"h:i A" }}</div>
+                                </td>
+                                <td class="text-center">
+                                    {% if p.referral_code %}
+                                    <a href="{% url 'view_referral_students' p.referral_code %}" class="btn-pop shadow-sm">
+                                        <i class="fa fa-eye"></i> <span>View Referrals</span>
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="7" class="text-center py-5">No records found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-block d-md-none">
+            {% for p in participants %}
+            <div class="card shadow-sm mb-3 border-0 mobile-fancy-card">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0" style="font-size: 1.1rem;">{{ p.candidate_name }}</h6>
+                            <small class="text-primary fw-bold">{{ p.exam.name }}</small>
+                        </div>
+                        <span class="badge-date">{{ p.started_at|date:"d M Y" }}</span>
+                    </div>
+
+                    <div class="info-row"><i class="fa fa-phone text-success"></i> <span>{{ p.candidate_phone }}</span></div>
+                    <div class="info-row"><i class="fa fa-map-marker-alt text-danger"></i> <span>{{ p.candidate_address }}</span></div>
+
+                    {% if p.referral_code %}
+                    <a href="{% url 'view_referral_students' p.referral_code %}" class="btn-pop w-100 mt-3 py-2 text-center">
+                        <i class="fa fa-eye me-2"></i> View Referrals
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    $('#participantTable').DataTable({
+        "pageLength": 10,
+        "ordering": true,
+        "language": { "search": "Quick Search:" }
+    });
+});
+</script>
+
+<style>
+/* --- 1. THE "POP" BUTTON STYLE --- */
+.btn-pop {
+    background: linear-gradient(135deg, #3f6ad8 0%, #2955c8 100%);
+    color: white !important;
+    padding: 8px 18px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none !important;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px rgba(63, 106, 216, 0.2);
+}
+
+.btn-pop:hover {
+    transform: translateY(-4px) scale(1.05); /* Pop Up Effect */
+    box-shadow: 0 10px 20px rgba(63, 106, 216, 0.4);
+    background: linear-gradient(135deg, #4b7bec 0%, #3f6ad8 100%);
+}
+
+.btn-pop:active {
+    transform: translateY(0) scale(0.95); /* Click Effect */
+}
+
+/* --- 2. STATS BADGE --- */
+.total-badge {
+    background: white;
+    padding: 10px 25px;
+    border-radius: 50px;
+    color: #3f6ad8;
+    font-weight: 800;
+    border: 1px solid #e0e6ed;
+    font-size: 14px;
+}
+.counter-value {
+    color: #2d3436;
+    background: #f0f3ff;
+    padding: 2px 10px;
+    border-radius: 10px;
+    margin-left: 5px;
+}
+
+/* --- 3. TABLE STYLING --- */
+thead th {
+    background-color: #f8faff !important;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #576574;
+}
+.exam-dot {
+    height: 8px;
+    width: 8px;
+    background: #3f6ad8;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(63, 106, 216, 0.6);
+}
+.contact-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #f1f2f6;
+    border-radius: 50px;
+    font-size: 12px;
+    color: #2f3542;
+}
+
+/* --- 4. MOBILE FANCY CARD --- */
+.mobile-fancy-card {
+    border-radius: 18px;
+    border-bottom: 4px solid #3f6ad8 !important;
+    transition: all 0.2s;
+}
+.badge-date {
+    background: #f0f3ff;
+    color: #3f6ad8;
+    padding: 5px 12px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+}
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: #57606f;
+}
+
+/* --- 5. ANIMATIONS --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+tbody tr {
+    animation: fadeIn 0.4s ease forwards;
+}
+</style>
+
+{% endblock %}

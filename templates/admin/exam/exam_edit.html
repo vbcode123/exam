@@ -1,0 +1,108 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- Page Title -->
+    <div class="app-page-title mb-4">
+        <div class="page-title-wrapper d-flex justify-content-between align-items-center">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-note2 icon-gradient bg-mean-fruit"></i>
+                </div>
+                <div>
+                    Edit Exam
+                    <div class="page-title-subheading">
+                        Update exam basic details
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Exam Name -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Exam Name
+                            </label>
+                            <input type="text"
+                                   name="name"
+                                   value="{{ exam.name }}"
+                                   class="form-control form-control-lg"
+                                   placeholder="Enter exam name"
+                                   required>
+                        </div>
+
+                        <!-- Duration -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Duration (Minutes)
+                            </label>
+                            <input type="number"
+                                   name="duration"
+                                   value="{{ exam.duration_minutes }}"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. 60"
+                                   required>
+                        </div>
+
+                        <!-- Marks Per Question -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Marks Per Question
+                            </label>
+                            <input type="number"
+                                   name="marks"
+                                   value="{{ exam.marks_per_question }}"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. 1"
+                                   required>
+                        </div>
+
+                        <!-- Negative Marking -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                Negative Marking
+                            </label>
+                            <input type="number"
+                                   step="0.25"
+                                   name="negative"
+                                   value="{{ exam.negative_marking }}"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. 0.25">
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a href="{% url 'exam_list' %}"
+                               class="btn btn-outline-secondary btn-lg px-4">
+                                Cancel
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-success btn-lg px-5">
+                                💾 Save Changes
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+{% endblock %}

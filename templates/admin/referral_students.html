@@ -1,0 +1,229 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Referral Students{% endblock %}
+
+{% block content %}
+
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <div class="app-page-title mb-4 bg-white shadow-sm p-4" style="border-radius: 15px; border-left: 5px solid #764ba2;">
+            <div class="page-title-wrapper">
+                <div class="page-title-heading">
+                    <div class="page-title-icon text-white shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="pe-7s-share"></i>
+                    </div>
+                    <div>
+                        <span class="fw-bold" style="letter-spacing: -0.5px; font-size: 1.5rem;">Referral Analytics</span>
+                        <div class="page-title-subheading text-muted mt-1">
+                            Admin > Referrals > Detailed Usage Tracking
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4 g-3">
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center d-flex flex-column justify-content-center py-4">
+                        <small class="text-uppercase fw-bold text-muted mb-3" style="font-size: 11px; letter-spacing: 1px;">Active Referral Code</small>
+                        <div class="referral-code-v2">
+                            {{ referral.code }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center d-flex flex-column justify-content-center py-4">
+                        <small class="text-uppercase fw-bold text-muted mb-3" style="font-size: 11px; letter-spacing: 1px;">Referral Owner</small>
+                        <h4 class="fw-bold text-dark mb-0">
+                            <span class="owner-phone-pill">
+                                <i class="fa fa-phone-alt text-primary me-2"></i> {{ referral.phone }}
+                            </span>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 15px; background: #fff;">
+                    <div class="card-body text-center py-4">
+                        <small class="text-uppercase fw-bold text-muted mb-3 d-block" style="font-size: 11px; letter-spacing: 1px;">Reward Status</small>
+                        
+                        <div class="d-flex align-items-center justify-content-center mb-2">
+                            <h3 class="fw-bold mb-0 {% if total_referrals >= 5 %}text-success{% else %}text-primary{% endif %}">
+                                {{ total_referrals }} <span class="text-muted" style="font-size: 1rem;">/ 5</span>
+                            </h3>
+                        </div>
+
+                        {% if total_referrals >= 5 %}
+                            <div class="badge-unlocked shadow-sm">
+                                <i class="fa fa-certificate me-1"></i> Discount Unlocked
+                            </div>
+                        {% else %}
+                            <div class="progress mb-2 shadow-sm" style="height: 8px; border-radius: 10px; background: #eee;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: {% widthratio total_referrals 5 100 %}%; background: #3f6ad8;"></div>
+                            </div>
+                            <small class="text-muted fw-bold" style="font-size: 11px;">
+                                <i class="fa fa-info-circle me-1"></i> {{ remaining }} more to reach target
+                            </small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px; overflow: hidden;">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="fa fa-list-ul me-2 text-primary"></i> 
+                    Linked Students Usage
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4 py-3 border-0 text-uppercase small text-muted">#</th>
+                                <th class="py-3 border-0 text-uppercase small text-muted">Student Name</th>
+                                <th class="py-3 border-0 text-uppercase small text-muted">Phone Number</th>
+                                <th class="py-3 border-0 text-uppercase small text-muted">Examination</th>
+                                <th class="py-3 border-0 text-uppercase small text-muted text-center">Attempt Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in usages %}
+                            <tr class="student-row">
+                                <td class="ps-4"><span class="text-muted fw-bold">{{ forloop.counter }}</span></td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ u.attempt.candidate_name }}</div>
+                                    <small class="text-muted"><i class="fa fa-map-marker-alt me-1"></i> {{ u.attempt.candidate_address|truncatechars:25 }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border fw-normal py-2 px-3" style="border-radius: 8px;">
+                                        {{ u.referred_phone }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="exam-tag">
+                                        {{ u.attempt.exam.name }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="fw-bold small text-dark">{{ u.attempt.started_at|date:"d M Y" }}</div>
+                                    <div class="text-muted" style="font-size: 11px;">{{ u.attempt.started_at|date:"h:i A" }}</div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/5058/5058432.png" width="60" class="opacity-2 mb-3 d-block mx-auto">
+                                    No students have used this referral code yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-0 py-3 ps-4">
+                <a href="{% url 'free_test_participants' %}" class="btn-back-custom">
+                    <i class="fa fa-arrow-left me-2"></i> Back to Participants
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+/* --- 1. NEON REFERRAL CODE BOX --- */
+.referral-code-v2 {
+    background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+    color: white;
+    padding: 12px 25px;
+    font-size: 22px;
+    font-weight: 800;
+    border-radius: 12px;
+    display: inline-block;
+    letter-spacing: 3px;
+    box-shadow: 0 10px 20px rgba(0, 176, 155, 0.2);
+    border: 2px dashed rgba(255,255,255,0.4);
+}
+
+/* --- 2. OWNER PHONE PILL --- */
+.owner-phone-pill {
+    background: #f0f4ff;
+    padding: 8px 15px;
+    border-radius: 10px;
+    color: #3f6ad8;
+}
+
+/* --- 3. UNLOCKED BADGE ANIMATION --- */
+.badge-unlocked {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 8px 15px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 12px;
+    display: inline-block;
+    border: 1px solid #c8e6c9;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+}
+
+/* --- 4. EXAM TAG --- */
+.exam-tag {
+    background: #e0f2f1;
+    color: #00796b;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    border-left: 3px solid #00796b;
+}
+
+/* --- 5. BACK BUTTON --- */
+.btn-back-custom {
+    color: #6c757d;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 15px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    background: #f8f9fa;
+}
+.btn-back-custom:hover {
+    background: #e9ecef;
+    color: #212529;
+    transform: translateX(-5px);
+}
+
+/* --- 6. TABLE ROW HOVER --- */
+.student-row:hover {
+    background-color: #fbfcfe !important;
+    cursor: default;
+}
+
+/* Critical CSS Fixes */
+.card { height: auto !important; transition: transform 0.3s ease; }
+.card:hover { transform: translateY(-2px); }
+</style>
+
+{% endblock %}

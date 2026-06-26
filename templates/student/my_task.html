@@ -1,0 +1,333 @@
+{% extends "student/dashboard.html" %}
+{% load static %}
+
+{% block title %}My Exam Tasks{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+    <div class="app-main__inner">
+
+        <!-- ================= PAGE HEADER ================= -->
+        <div class="app-page-title mb-4">
+            <div class="page-title-wrapper d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="page-title-heading d-flex align-items-center">
+                    <div class="page-title-icon me-3">
+                        <i class="pe-7s-notebook icon-gradient bg-mixed-hopes"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">My Exam Tasks</h4>
+                        <div class="page-title-subheading">
+                            List of all exams assigned to you by the administrator.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-title-actions mt-2 mt-md-0">
+                    <a href="{% url 'student_dashboard' %}" class="btn btn-secondary shadow-sm rounded-pill px-4">
+                        <i class="fas fa-home me-1"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        {% if task_data %}
+
+        <!-- ================= DESKTOP TABLE VIEW ================= -->
+        <div class="main-card mb-3 card shadow-sm border-0 rounded-lg overflow-hidden desktop-table-view">
+            <div class="card-header bg-light d-flex align-items-center">
+                <div class="card-header-title font-size-lg text-capitalize fw-normal text-muted">
+                    <i class="header-icon lnr-hourglass icon-gradient bg-plum-plate"></i>
+                    Pending & Completed Tasks
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="align-middle mb-0 table table-borderless table-striped table-hover">
+                    <thead>
+                        <tr class="bg-light text-muted text-uppercase"
+                            style="font-size: 0.75rem; letter-spacing: 1px;">
+                            <th class="text-center ps-4">#</th>
+                            <th>Exam Information</th>
+                            <th class="text-center">Questions</th>
+                            <th class="text-center">Duration</th>
+                            <th class="text-center">Assigned Date</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in task_data %}
+                        <tr>
+                            <td class="text-center text-muted ps-4" style="width: 50px;">
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left flex2">
+                                            <div class="widget-heading" style="font-size: 1rem; color: #333;">
+                                                <strong>{{ row.task.exam.name }}</strong>
+                                            </div>
+                                            <div class="widget-subheading opacity-7">
+                                                <i class="fas fa-tag me-1"></i> Task: {{ row.task.task_name }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="text-center">
+                                <span class="badge rounded-pill bg-light text-dark border">
+                                    {{ row.total_questions }} Qs
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+                                <div class="text-dark fw-bold">
+                                    <i class="far fa-clock me-1 text-info"></i>
+                                    {{ row.duration }} <small>min</small>
+                                </div>
+                            </td>
+
+                            <td class="text-center text-muted" style="font-size: 0.85rem;">
+                                {{ row.task.created_at|date:"d M Y" }}
+                            </td>
+
+                            <td class="text-center">
+                                {% if row.completed %}
+                                    <div class="badge bg-success shadow-sm status-pill">
+                                        <i class="fas fa-check-circle me-1"></i> Completed
+                                    </div>
+                                {% else %}
+                                    <div class="badge bg-warning text-dark shadow-sm status-pill">
+                                        <i class="fas fa-spinner fa-spin me-1"></i> Pending
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center pe-4">
+                                {% if row.completed %}
+                                    <button class="btn btn-sm btn-outline-secondary px-3 rounded-pill" disabled>
+                                        <i class="fas fa-lock me-1"></i> Submitted
+                                    </button>
+                                {% else %}
+                                    <a href="{% url 'start_exam' row.task.exam.id row.task.id %}"
+                                       class="btn btn-sm btn-primary shadow px-3 rounded-pill btn-hover-shine">
+                                        <i class="fas fa-play me-1"></i> Start Exam
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer bg-light p-3">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Please ensure a stable internet connection before starting an exam.
+                </small>
+            </div>
+        </div>
+
+
+        <!-- ================= MOBILE CARD VIEW ================= -->
+        <div class="mobile-card-view">
+            <div class="row g-3">
+                {% for row in task_data %}
+                <div class="col-12">
+                    <div class="task-card shadow-sm">
+                        <div class="task-card-top">
+                            <div class="d-flex align-items-start justify-content-between gap-2">
+                                <div>
+                                    <div class="task-title">{{ row.task.exam.name }}</div>
+                                    <div class="task-subtitle">
+                                        <i class="fas fa-tag me-1"></i>
+                                        Task: <b>{{ row.task.task_name }}</b>
+                                    </div>
+                                </div>
+
+                                {% if row.completed %}
+                                    <span class="badge bg-success status-pill">
+                                        <i class="fas fa-check-circle me-1"></i> Done
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark status-pill">
+                                        <i class="fas fa-spinner fa-spin me-1"></i> Pending
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="task-card-body">
+                            <div class="mini-grid">
+                                <div class="mini-box">
+                                    <div class="mini-label">Questions</div>
+                                    <div class="mini-value">{{ row.total_questions }}</div>
+                                </div>
+
+                                <div class="mini-box">
+                                    <div class="mini-label">Duration</div>
+                                    <div class="mini-value">{{ row.duration }} min</div>
+                                </div>
+
+                                <div class="mini-box">
+                                    <div class="mini-label">Assigned</div>
+                                    <div class="mini-value">{{ row.task.created_at|date:"d M Y" }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-card-footer">
+                            {% if row.completed %}
+                                <button class="btn btn-outline-secondary w-100 rounded-pill" disabled>
+                                    <i class="fas fa-lock me-1"></i> Submitted
+                                </button>
+                            {% else %}
+                                <a href="{% url 'start_exam' row.task.exam.id row.task.id %}"
+                                   class="btn btn-primary w-100 rounded-pill shadow-sm">
+                                    <i class="fas fa-play me-1"></i> Start Exam
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-lg p-3 mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Please ensure a stable internet connection before starting an exam.
+                </small>
+            </div>
+        </div>
+
+        {% else %}
+
+        <!-- ================= EMPTY STATE ================= -->
+        <div class="text-center p-5 card shadow-sm border-0 rounded-lg">
+            <div class="mb-3">
+                <i class="pe-7s-smile icon-gradient bg-happy-itmeo" style="font-size: 5rem;"></i>
+            </div>
+            <h4 class="text-muted">No Tasks Assigned</h4>
+            <p class="text-muted">You have no pending exams at the moment. Enjoy your free time!</p>
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+
+
+<!-- ================= STYLES ================= -->
+<style>
+    .card { border-radius: 15px !important; }
+    .table thead th { border: none !important; }
+    .table tbody td {
+        vertical-align: middle !important;
+        padding: 15px 10px;
+        border-top: 1px solid #f8f9fa;
+    }
+
+    .btn-hover-shine:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+    }
+
+    .widget-subheading { font-size: 0.8rem; }
+
+    .status-pill {
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    /* ================= MOBILE CARD UI ================= */
+    .task-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .task-card-top {
+        padding: 14px 14px 10px;
+        background: linear-gradient(135deg, rgba(37,99,235,0.08), rgba(2,6,23,0.03));
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .task-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .task-subtitle {
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .task-card-body {
+        padding: 12px 14px;
+    }
+
+    .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .mini-box {
+        background: rgba(2,6,23,0.03);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 14px;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .mini-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .mini-value {
+        margin-top: 2px;
+        font-weight: 900;
+        color: #0f172a;
+        font-size: 0.95rem;
+    }
+
+    .task-card-footer {
+        padding: 12px 14px 14px;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* ================= RESPONSIVE SWITCH ================= */
+    .mobile-card-view { display: none; }
+    .desktop-table-view { display: block; }
+
+    @media (max-width: 768px) {
+        .desktop-table-view { display: none !important; }
+        .mobile-card-view { display: block !important; }
+
+        .page-title-wrapper {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+
+        .mini-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+</style>
+
+{% endblock %}
