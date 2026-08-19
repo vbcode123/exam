@@ -1,0 +1,233 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Add Live Class{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- PAGE HEADER -->
+    <div class="app-page-title mb-4">
+        <div class="page-title-wrapper d-flex justify-content-between align-items-center flex-wrap">
+            <div class="page-title-heading d-flex align-items-center">
+                <div class="page-title-icon me-3">
+                    <i class="fab fa-youtube text-danger" style="font-size: 32px;"></i>
+                </div>
+                <div>
+                    <h4 class="mb-0 fw-bold text-dark">Add Live Class / Lecture</h4>
+                    <div class="page-title-subheading text-muted">
+                        Publish live streams, recorded lectures, and YouTube video classes
+                    </div>
+                </div>
+            </div>
+            <div class="page-title-actions mt-2 mt-md-0">
+                <a href="{% url 'live_class_list' %}" class="btn btn-outline-primary btn-sm px-3 shadow-sm">
+                    <i class="fas fa-list me-1"></i> Live Class List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-12">
+            <div class="card shadow border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-video me-2 fa-lg"></i>
+                        <h5 class="mb-0 fw-semibold">New YouTube Live / Class Link</h5>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-md-5 bg-white">
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
+                                <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" id="liveClassForm">
+                        {% csrf_token %}
+
+                        <!-- 1. SUBJECT SELECTION -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-book text-primary me-1"></i> Select Subject <span class="text-danger">*</span>
+                            </label>
+                            <select name="subject_id" id="subjectSelect" class="form-control form-control-lg custom-select" required>
+                                <option value="">-- Choose Subject --</option>
+                                {% for sub in subjects %}
+                                    <option value="{{ sub.id }}" {% if selected_subject_id == sub.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ sub.name }}
+                                    </option>
+                                {% endfor %}
+                                <option value="new" class="fw-bold text-primary">+ Add New Subject</option>
+                            </select>
+                        </div>
+
+                        <!-- 1.1 NEW SUBJECT INPUT (Hidden by default) -->
+                        <div class="mb-4" id="newSubjectBox" style="display: none;">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-plus-circle text-success me-1"></i> New Subject Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   name="new_subject"
+                                   id="newSubjectInput"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. Science, Mathematics, History">
+                            <small class="text-muted">Enter the subject name if not present in the list.</small>
+                        </div>
+
+                        <!-- 2. CHAPTER / TOPIC NAME -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-bookmark text-primary me-1"></i> Chapter / Topic Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   name="chapter_name"
+                                   id="chapterInput"
+                                   list="existingChaptersList"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. Chapter 1: Introduction to Calculus"
+                                   required>
+                            <datalist id="existingChaptersList"></datalist>
+                            <small class="text-muted">Type chapter name or choose from suggestions.</small>
+                        </div>
+
+                        <!-- 3. CLASS TITLE / HEADING -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-heading text-primary me-1"></i> Class Title / Lecture Description <span class="text-muted fw-normal">(Optional)</span>
+                            </label>
+                            <input type="text"
+                                   name="title"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. Live Q&A and Problem Solving Session">
+                            <small class="text-muted">If left blank, Chapter Name will be used as the title.</small>
+                        </div>
+
+                        <!-- 4. YOUTUBE URL -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fab fa-youtube text-danger me-1"></i> YouTube Video / Live Stream Link <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-light"><i class="fas fa-link text-muted"></i></span>
+                                </div>
+                                <input type="url"
+                                       name="youtube_url"
+                                       id="youtubeUrlInput"
+                                       class="form-control form-control-lg"
+                                       placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                                       required>
+                            </div>
+                            <small class="text-muted">Paste standard YouTube video, live stream, or short URL.</small>
+
+                            <!-- Live Video Preview Box -->
+                            <div id="videoPreviewBox" class="mt-3 p-3 bg-light rounded-3 border d-none">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-play-circle text-danger me-2"></i>
+                                    <span class="fw-bold text-dark small">Video Preview:</span>
+                                </div>
+                                <div class="ratio ratio-16x9 embed-responsive embed-responsive-16by9 rounded overflow-hidden shadow-sm" style="max-height: 250px;">
+                                    <iframe id="previewIframe" class="embed-responsive-item" src="" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. SUBMIT BUTTON -->
+                        <div class="d-grid gap-2 mt-4 pt-2">
+                            <button type="submit" class="btn btn-danger btn-lg fw-bold shadow-sm" style="background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%); border: none; padding: 14px;">
+                                <i class="fas fa-check-circle me-2"></i> Save & Publish Live Class
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<style>
+.form-control-lg, .custom-select {
+    border-radius: 8px;
+    font-size: 0.98rem;
+}
+.form-control:focus, .custom-select:focus {
+    border-color: #ef473a;
+    box-shadow: 0 0 0 0.2rem rgba(239, 71, 58, 0.2);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const subjectSelect = document.getElementById("subjectSelect");
+    const newSubjectBox = document.getElementById("newSubjectBox");
+    const newSubjectInput = document.getElementById("newSubjectInput");
+    const chaptersList = document.getElementById("existingChaptersList");
+    const youtubeInput = document.getElementById("youtubeUrlInput");
+    const videoPreviewBox = document.getElementById("videoPreviewBox");
+    const previewIframe = document.getElementById("previewIframe");
+
+    // Handle Subject Dropdown
+    subjectSelect.addEventListener("change", function() {
+        if (this.value === "new") {
+            newSubjectBox.style.display = "block";
+            newSubjectInput.required = true;
+            newSubjectInput.focus();
+            chaptersList.innerHTML = "";
+        } else {
+            newSubjectBox.style.display = "none";
+            newSubjectInput.required = false;
+            newSubjectInput.value = "";
+
+            if (this.value) {
+                fetch(`/api/subject/${this.value}/chapters/`)
+                    .then(res => res.json())
+                    .then(data => {
+                        chaptersList.innerHTML = "";
+                        data.forEach(chap => {
+                            const opt = document.createElement("option");
+                            opt.value = chap.name;
+                            chaptersList.appendChild(opt);
+                        });
+                    })
+                    .catch(err => console.log(err));
+            }
+        }
+    });
+
+    // YouTube URL ID extractor & preview
+    function extractYouTubeID(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|live\/)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    youtubeInput.addEventListener("input", function () {
+        const val = this.value.trim();
+        const videoId = extractYouTubeID(val);
+        if (videoId) {
+            previewIframe.src = `https://www.youtube.com/embed/${videoId}`;
+            videoPreviewBox.classList.remove("d-none");
+        } else {
+            previewIframe.src = "";
+            videoPreviewBox.classList.add("d-none");
+        }
+    });
+});
+</script>
+{% endblock %}

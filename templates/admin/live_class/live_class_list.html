@@ -1,0 +1,251 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Live Classes List{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- PAGE HEADER -->
+    <div class="app-page-title mb-4">
+        <div class="page-title-wrapper d-flex justify-content-between align-items-center flex-wrap">
+            <div class="page-title-heading d-flex align-items-center">
+                <div class="page-title-icon me-3">
+                    <i class="fab fa-youtube text-danger" style="font-size: 32px;"></i>
+                </div>
+                <div>
+                    <h4 class="mb-0 fw-bold text-dark">Live Classes & Video Lectures</h4>
+                    <div class="page-title-subheading text-muted">
+                        Manage all published YouTube live streams and video lectures
+                    </div>
+                </div>
+            </div>
+            <div class="page-title-actions mt-2 mt-md-0 d-flex gap-2">
+                <a href="{% url 'add_live_class' %}" class="btn btn-danger btn-sm px-3 shadow-sm" style="background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%); border: none;">
+                    <i class="fas fa-plus-circle me-1"></i> Add Live Class
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row mb-4">
+        <div class="col-md-4 col-sm-6 mb-3 mb-md-0">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Total Live Classes</span>
+                    <h3 class="fw-bold mb-0 text-danger mt-1">{{ classes.count }}</h3>
+                </div>
+                <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #fef2f2;">
+                    <i class="fab fa-youtube text-danger fa-lg"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6 mb-3 mb-md-0">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Total Subjects</span>
+                    <h3 class="fw-bold mb-0 text-primary mt-1">{{ subjects.count }}</h3>
+                </div>
+                <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #eff6ff;">
+                    <i class="fas fa-book text-primary fa-lg"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Latest Class</span>
+                    <h6 class="fw-bold mb-0 text-dark mt-1 text-truncate" style="max-width: 180px;">
+                        {% if classes.first %}{{ classes.first.chapter_name }}{% else %}No Classes Yet{% endif %}
+                    </h6>
+                    <small class="text-muted">{% if classes.first %}{{ classes.first.created_at|date:"d M Y" }}{% else %}-{% endif %}</small>
+                </div>
+                <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #fffbeb;">
+                    <i class="fas fa-video text-warning fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN TABLE CARD -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap">
+            <h6 class="fw-bold text-dark mb-0">
+                <i class="fas fa-list-ul text-danger me-2"></i> All Live Classes
+            </h6>
+            
+            <!-- Quick Filter -->
+            <div class="d-flex align-items-center mt-2 mt-sm-0">
+                <label class="me-2 mb-0 small text-muted fw-bold">Filter Subject:</label>
+                <select id="subjectFilter" class="form-control form-control-sm custom-select" style="min-width: 160px; border-radius: 6px;">
+                    <option value="">All Subjects</option>
+                    {% for sub in subjects %}
+                        <option value="{{ sub.name }}">{{ sub.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            {% if classes %}
+            <div class="table-responsive">
+                <table id="live-classes-table" class="table table-hover align-middle mb-0 w-100">
+                    <thead class="bg-light text-dark text-uppercase small" style="letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="text-center py-3" style="width: 50px;">#</th>
+                            <th class="py-3">Subject</th>
+                            <th class="py-3">Chapter / Topic</th>
+                            <th class="py-3">Class Title</th>
+                            <th class="py-3">YouTube Link</th>
+                            <th class="py-3 text-center">Published Date</th>
+                            <th class="py-3 text-center" style="width: 180px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in classes %}
+                        <tr>
+                            <td class="text-center fw-bold text-muted">{{ forloop.counter }}</td>
+                            <td>
+                                <span class="badge rounded-pill px-3 py-2 text-danger" style="background-color: #fef2f2; font-size: 0.85rem; border: 1px solid #fecaca;">
+                                    <i class="fas fa-book me-1"></i> {{ c.subject.name }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ c.chapter_name }}</div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fab fa-youtube text-danger fa-lg me-2"></i>
+                                    <div>
+                                        <span class="text-dark fw-semibold">{{ c.title|default:c.chapter_name }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if c.youtube_thumbnail_url %}
+                                <a href="{{ c.youtube_url }}" target="_blank" class="d-inline-flex align-items-center text-decoration-none" title="Open in YouTube">
+                                    <img src="{{ c.youtube_thumbnail_url }}" alt="Thumbnail" class="rounded me-2" style="width: 60px; height: 35px; object-fit: cover; border: 1px solid #ddd;">
+                                    <span class="small text-truncate text-primary" style="max-width: 140px;">Watch Video</span>
+                                </a>
+                                {% else %}
+                                <a href="{{ c.youtube_url }}" target="_blank" class="small text-truncate d-inline-block text-primary" style="max-width: 180px;">
+                                    {{ c.youtube_url }}
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="text-dark fw-semibold">{{ c.created_at|date:"d M Y" }}</div>
+                                <small class="text-muted">{{ c.created_at|date:"h:i A" }}</small>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group gap-1" role="group">
+                                    <!-- Watch Video Button -->
+                                    <a href="{{ c.youtube_url }}"
+                                       target="_blank"
+                                       class="btn btn-danger btn-sm text-white px-2 py-1 shadow-sm"
+                                       title="Watch on YouTube"
+                                       style="border-radius: 6px;">
+                                        <i class="fas fa-play me-1"></i> Watch
+                                    </a>
+
+                                    <!-- Delete Button -->
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm px-2 py-1 delete-btn shadow-sm"
+                                            data-url="{% url 'delete_live_class' c.id %}"
+                                            data-title="{{ c.chapter_name }}"
+                                            title="Delete Live Class"
+                                            style="border-radius: 6px;">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fab fa-youtube text-muted" style="font-size: 60px; opacity: 0.4;"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">No Live Classes Found</h5>
+                <p class="text-muted mb-3">Publish your first YouTube live stream or recorded video lecture.</p>
+                <a href="{% url 'add_live_class' %}" class="btn btn-danger btn-sm px-4 py-2" style="background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%); border: none;">
+                    <i class="fas fa-plus-circle me-1"></i> Add Live Class Now
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<style>
+.table td, .table th {
+    vertical-align: middle;
+}
+#live-classes-table_wrapper {
+    padding: 1rem;
+}
+.dataTables_filter input {
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    padding: 4px 8px;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+$(document).ready(function () {
+    if ($('#live-classes-table').length) {
+        let table = $('#live-classes-table').DataTable({
+            pageLength: 10,
+            responsive: true,
+            ordering: true,
+            language: {
+                search: "_INPUT_",
+                searchPlaceholder: "Search live classes..."
+            }
+        });
+
+        // Subject Filter Dropdown
+        $('#subjectFilter').on('change', function () {
+            let val = $(this).val();
+            table.column(1).search(val ? val : '', true, false).draw();
+        });
+    }
+
+    // SweetAlert Delete Confirmation
+    $(".delete-btn").on("click", function () {
+        let url = $(this).data("url");
+        let title = $(this).data("title") || "this class";
+
+        Swal.fire({
+            title: "Delete Live Class?",
+            text: `Are you sure you want to delete "${title}"? This cannot be undone.`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

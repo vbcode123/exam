@@ -93,50 +93,35 @@ from django.conf import settings
 # -------------------------
 # Admission Form
 # -------------------------
-from django.shortcuts import render
-from django.contrib import messages
-from .models import Student
-
 def admission_form(request):
 
     if request.method == "POST":
 
-        name = request.POST.get("name")
-        phone = request.POST.get("phone")
-        email = request.POST.get("email")
-        course = request.POST.get("course")
-        center_name = request.POST.get("center_name")
-        address = request.POST.get("address")
-        password = request.POST.get("password")
-        photo = request.FILES.get("photo")
+        payment_id = request.POST.get("razorpay_payment_id") or "manual"
 
-        # Check duplicate Email
-        if Student.objects.filter(email=email).exists():
-            messages.error(request, "❌ This Email ID is already registered.")
-            return render(request, "admission/form.html")
+        student = Student.objects.create(
+            name=request.POST.get("name"),
+            phone=request.POST.get("phone"),
+            email=request.POST.get("email"),
+            course=request.POST.get("course"),
+            center_name=request.POST.get("center_name"),
+            address=request.POST.get("address"),
 
-        # Check duplicate Phone
-        if Student.objects.filter(phone=phone).exists():
-            messages.error(request, "❌ This Phone Number is already registered.")
-            return render(request, "admission/form.html")
+            # ✅ plain password
+            password=request.POST.get("password"),
 
-        # Save Student
-        Student.objects.create(
-            name=name,
-            phone=phone,
-            email=email,
-            course=course,
-            center_name=center_name,
-            address=address,
-            password=password,   # Plain password
-            photo=photo,
-            payment_status="pending",
+            photo=request.FILES.get("photo"),
+            razorpay_payment_id=payment_id,
+            payment_status="success",
             is_approved=False
         )
 
-        return render(request, "admission/success.html")
+        return render(request, "admin/admission/success.html")
 
-    return render(request, "admission/form.html")
+    return render(request, "admission/form.html", {
+        "RAZORPAY_API_KEY": settings.RAZORPAY_API_KEY
+    })
+
 # -------------------------
 # Create Razorpay Order
 # -------------------------
@@ -247,113 +232,43 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import send_mail
 from django.conf import settings
 
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.admin.views.decorators import staff_member_required
-from django.core.mail import send_mail
-from django.conf import settings
-import requests
-
-
-# ==========================================
-# SEND WHATSAPP MESSAGE
-# ==========================================
-def send_whatsapp(phone, message):
-    url = "https://wchat.online/api/send"
-
-    payload = {
-        "number": f"91{phone}",
-        "type": "text",
-        "message": message,
-        "instance_id": "6A32A3AF4A0A2",
-        "access_token": "692fbc0826bbd"
-    }
-
-    try:
-        response = requests.post(
-            url,
-            json=payload,
-            timeout=20
-        )
-        print("WhatsApp Response:", response.text)
-
-    except Exception as e:
-        print("WhatsApp Error:", e)
-
-
-# ==========================================
-# APPROVE ADMISSION
-# ==========================================
 @staff_member_required(login_url="/panel/login/")
 def admission_approve(request, id):
+    # 🔒 only unapproved admission
+    student = get_object_or_404(Student, id=id, is_approved=False)
 
-    student = get_object_or_404(
-        Student,
-        id=id,
-        is_approved=False
-    )
-
-    # ✅ Approve Student
+    # ✅ approve admission
     student.is_approved = True
     student.save()
 
-    # ==========================================
-    # EMAIL
-    # ==========================================
+    # ✅ SEND EMAIL WITH SAME PHONE & PASSWORD
     if student.email:
         send_mail(
             subject="Admission Approved – Login Details",
             message=f"""
 Hello {student.name},
 
-Your admission has been approved successfully.
+Your admission has been approved successfully ✅
 
-Login Details
-
+Login Details:
 Phone Number: {student.phone}
-
 Password: {student.password}
 
-Login Link
+(These are the same details you provided during admission)
 
+Login Link:
 https://vidyabhaban.in/exam/student/login/
 
 Regards,
-Vidyabhaban Team
+Vidyabhaban Admin Team
 """,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[student.email],
-            fail_silently=True
+            fail_silently=False
         )
 
-    # ==========================================
-    # WHATSAPP
-    # ==========================================
-    whatsapp_message = f"""
-🎉 Hello {student.name},
-
-Your admission has been approved successfully. ✅
-
-━━━━━━━━━━━━━━━━━━
-
-📱 Phone:
-{student.phone}
-
-🔑 Password:
-{student.password}
-
-━━━━━━━━━━━━━━━━━━
-
-🔗 Login Here
-
-https://vidyabhaban.in/exam/student/login/
-
-Regards,
-Vidyabhaban Team
-"""
-
-    send_whatsapp(student.phone, whatsapp_message)
-
     return redirect("student_list")
+
 
 @staff_member_required(login_url="/panel/login/")
 def student_edit(request, id):
@@ -2410,3 +2325,295 @@ def center_student_delete(request, id):
 
     messages.success(request, "Student deleted successfully ✅")
     return redirect("center_student_list")
+
+
+# =====================================================
+# STUDY MATERIAL MANAGEMENT (ADMIN PANEL)
+# =====================================================
+from django.http import FileResponse, Http404
+from .models import StudyMaterial
+import os
+
+@staff_member_required(login_url="/panel/login/")
+def add_material(request):
+    subjects = Subject.objects.all().order_by("name")
+
+    if request.method == "POST":
+        subject_id = request.POST.get("subject_id")
+        new_subject_name = request.POST.get("new_subject", "").strip()
+        chapter_name = request.POST.get("chapter_name", "").strip()
+        title = request.POST.get("title", "").strip()
+        pdf_file = request.FILES.get("pdf_file")
+
+        # Subject Resolution (choose existing or create new)
+        subject = None
+        if subject_id and subject_id != "new":
+            try:
+                subject = Subject.objects.get(id=subject_id)
+            except Subject.DoesNotExist:
+                messages.error(request, "Selected subject does not exist.")
+                return redirect("add_material")
+        elif new_subject_name:
+            subject, _ = Subject.objects.get_or_create(name=new_subject_name.title())
+
+        if not subject:
+            messages.error(request, "Please select or enter a Subject name.")
+            return render(request, "admin/material/add_material.html", {"subjects": subjects})
+
+        if not chapter_name:
+            messages.error(request, "Please enter a Chapter name.")
+            return render(request, "admin/material/add_material.html", {
+                "subjects": subjects,
+                "selected_subject_id": str(subject.id)
+            })
+
+        if not pdf_file:
+            messages.error(request, "Please select a PDF file to upload.")
+            return render(request, "admin/material/add_material.html", {
+                "subjects": subjects,
+                "selected_subject_id": str(subject.id)
+            })
+
+        # File validation
+        if not pdf_file.name.lower().endswith(".pdf"):
+            messages.error(request, "Only PDF format files (.pdf) are allowed.")
+            return render(request, "admin/material/add_material.html", {
+                "subjects": subjects,
+                "selected_subject_id": str(subject.id)
+            })
+
+        # Keep Chapter model in sync
+        Chapter.objects.get_or_create(subject=subject, name=chapter_name.title())
+
+        # Create Study Material
+        material = StudyMaterial.objects.create(
+            subject=subject,
+            chapter_name=chapter_name.title(),
+            title=title or chapter_name.title(),
+            pdf_file=pdf_file,
+            created_at=timezone.now()
+        )
+
+        messages.success(request, f"Study Material for '{material.chapter_name}' saved successfully! ✅")
+        return redirect("material_list")
+
+    return render(request, "admin/material/add_material.html", {"subjects": subjects})
+
+
+@staff_member_required(login_url="/panel/login/")
+def material_list(request):
+    materials = StudyMaterial.objects.select_related("subject").all().order_by("-created_at")
+    subjects = Subject.objects.all().order_by("name")
+    return render(request, "admin/material/material_list.html", {
+        "materials": materials,
+        "subjects": subjects
+    })
+
+
+@staff_member_required(login_url="/panel/login/")
+def delete_material(request, id):
+    material = get_object_or_404(StudyMaterial, id=id)
+    title = material.title or material.chapter_name
+    if material.pdf_file:
+        try:
+            if os.path.isfile(material.pdf_file.path):
+                os.remove(material.pdf_file.path)
+        except Exception:
+            pass
+    material.delete()
+    messages.success(request, f"Material '{title}' deleted successfully! ✅")
+    return redirect("material_list")
+
+
+@staff_member_required(login_url="/panel/login/")
+def download_material(request, id):
+    material = get_object_or_404(StudyMaterial, id=id)
+    if not material.pdf_file:
+        messages.error(request, "PDF file not found.")
+        return redirect("material_list")
+
+    try:
+        file_handle = material.pdf_file.open('rb')
+        filename = os.path.basename(material.pdf_file.name)
+        response = FileResponse(file_handle, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    except Exception as e:
+        messages.error(request, "Could not download file.")
+        return redirect("material_list")
+
+
+@staff_member_required(login_url="/panel/login/")
+def get_subject_chapters(request, subject_id):
+    chapters = Chapter.objects.filter(subject_id=subject_id).values("id", "name").order_by("name")
+    return JsonResponse(list(chapters), safe=False)
+
+
+# =====================================================
+# STUDENT STUDY MATERIALS
+# =====================================================
+def student_materials(request):
+    if "student_id" not in request.session:
+        return redirect("student_login")
+
+    student = get_object_or_404(Student, id=request.session["student_id"])
+    materials = StudyMaterial.objects.select_related("subject").all().order_by("-created_at")
+    subjects = Subject.objects.all().order_by("name")
+
+    return render(request, "student/materials.html", {
+        "student": student,
+        "materials": materials,
+        "subjects": subjects,
+    })
+
+
+def student_download_material(request, id):
+    if "student_id" not in request.session:
+        return redirect("student_login")
+
+    material = get_object_or_404(StudyMaterial, id=id)
+    if not material.pdf_file:
+        messages.error(request, "PDF file not found.")
+        return redirect("student_materials")
+
+    try:
+        file_handle = material.pdf_file.open('rb')
+        filename = os.path.basename(material.pdf_file.name)
+        response = FileResponse(file_handle, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    except Exception:
+        messages.error(request, "Could not download file.")
+        return redirect("student_materials")
+
+
+def student_delete_material(request, id):
+    if "student_id" not in request.session:
+        return redirect("student_login")
+
+    material = get_object_or_404(StudyMaterial, id=id)
+    title = material.title or material.chapter_name
+    if material.pdf_file:
+        try:
+            if os.path.isfile(material.pdf_file.path):
+                os.remove(material.pdf_file.path)
+        except Exception:
+            pass
+    material.delete()
+    messages.success(request, f"Material '{title}' deleted successfully! ✅")
+    return redirect("student_materials")
+
+
+# =====================================================
+# LIVE CLASSES MANAGEMENT (ADMIN PANEL)
+# =====================================================
+from .models import LiveClass
+
+@staff_member_required(login_url="/panel/login/")
+def add_live_class(request):
+    subjects = Subject.objects.all().order_by("name")
+
+    if request.method == "POST":
+        subject_id = request.POST.get("subject_id")
+        new_subject_name = request.POST.get("new_subject", "").strip()
+        chapter_name = request.POST.get("chapter_name", "").strip()
+        title = request.POST.get("title", "").strip()
+        youtube_url = request.POST.get("youtube_url", "").strip()
+
+        # Subject Resolution
+        subject = None
+        if subject_id and subject_id != "new":
+            try:
+                subject = Subject.objects.get(id=subject_id)
+            except Subject.DoesNotExist:
+                messages.error(request, "Selected subject does not exist.")
+                return redirect("add_live_class")
+        elif new_subject_name:
+            subject, _ = Subject.objects.get_or_create(name=new_subject_name.title())
+
+        if not subject:
+            messages.error(request, "Please select or enter a Subject name.")
+            return render(request, "admin/live_class/add_live_class.html", {"subjects": subjects})
+
+        if not chapter_name:
+            messages.error(request, "Please enter a Chapter name.")
+            return render(request, "admin/live_class/add_live_class.html", {
+                "subjects": subjects,
+                "selected_subject_id": str(subject.id)
+            })
+
+        if not youtube_url:
+            messages.error(request, "Please provide a YouTube video or live stream link.")
+            return render(request, "admin/live_class/add_live_class.html", {
+                "subjects": subjects,
+                "selected_subject_id": str(subject.id)
+            })
+
+        # Sync Chapter model
+        Chapter.objects.get_or_create(subject=subject, name=chapter_name.title())
+
+        # Create Live Class
+        live_cls = LiveClass.objects.create(
+            subject=subject,
+            chapter_name=chapter_name.title(),
+            title=title or chapter_name.title(),
+            youtube_url=youtube_url,
+            created_at=timezone.now()
+        )
+
+        messages.success(request, f"Live Class for '{live_cls.chapter_name}' added successfully! ✅")
+        return redirect("live_class_list")
+
+    return render(request, "admin/live_class/add_live_class.html", {"subjects": subjects})
+
+
+@staff_member_required(login_url="/panel/login/")
+def live_class_list(request):
+    classes = LiveClass.objects.select_related("subject").all().order_by("-created_at")
+    subjects = Subject.objects.all().order_by("name")
+    return render(request, "admin/live_class/live_class_list.html", {
+        "classes": classes,
+        "subjects": subjects
+    })
+
+
+@staff_member_required(login_url="/panel/login/")
+def delete_live_class(request, id):
+    live_cls = get_object_or_404(LiveClass, id=id)
+    title = live_cls.title or live_cls.chapter_name
+    live_cls.delete()
+    messages.success(request, f"Live Class '{title}' deleted successfully! ✅")
+    return redirect("live_class_list")
+
+
+# =====================================================
+# STUDENT LIVE CLASSES
+# =====================================================
+def student_live_classes(request):
+    if "student_id" not in request.session:
+        return redirect("student_login")
+
+    student = get_object_or_404(Student, id=request.session["student_id"])
+    classes = LiveClass.objects.select_related("subject").all().order_by("-created_at")
+    subjects = Subject.objects.all().order_by("name")
+
+    return render(request, "student/live_classes.html", {
+        "student": student,
+        "classes": classes,
+        "subjects": subjects,
+    })
+
+
+def student_delete_live_class(request, id):
+    if "student_id" not in request.session:
+        return redirect("student_login")
+
+    live_cls = get_object_or_404(LiveClass, id=id)
+    title = live_cls.title or live_cls.chapter_name
+    live_cls.delete()
+    messages.success(request, f"Live Class '{title}' deleted successfully! ✅")
+    return redirect("student_live_classes")
+
+
+
+

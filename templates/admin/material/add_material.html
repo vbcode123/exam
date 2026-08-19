@@ -1,0 +1,311 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Add Study Material{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- PAGE HEADER -->
+    <div class="app-page-title mb-4">
+        <div class="page-title-wrapper d-flex justify-content-between align-items-center flex-wrap">
+            <div class="page-title-heading d-flex align-items-center">
+                <div class="page-title-icon me-3">
+                    <i class="fas fa-file-upload text-primary" style="font-size: 28px;"></i>
+                </div>
+                <div>
+                    <h4 class="mb-0 fw-bold text-dark">Add Study Material</h4>
+                    <div class="page-title-subheading text-muted">
+                        Upload notes, PDF study material, and chapter documents
+                    </div>
+                </div>
+            </div>
+            <div class="page-title-actions mt-2 mt-md-0">
+                <a href="{% url 'material_list' %}" class="btn btn-outline-primary btn-sm px-3 shadow-sm">
+                    <i class="fas fa-list me-1"></i> View Material List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-12">
+            <div class="card shadow border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-book-reader fa-lg me-2"></i>
+                        <h5 class="mb-0 fw-semibold">Upload New Material PDF</h5>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-md-5 bg-white">
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
+                                <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" id="materialForm">
+                        {% csrf_token %}
+
+                        <!-- 1. SUBJECT SELECTION -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-book text-primary me-1"></i> Select Subject <span class="text-danger">*</span>
+                            </label>
+                            <select name="subject_id" id="subjectSelect" class="form-control form-control-lg custom-select" required>
+                                <option value="">-- Choose Subject --</option>
+                                {% for sub in subjects %}
+                                    <option value="{{ sub.id }}" {% if selected_subject_id == sub.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ sub.name }}
+                                    </option>
+                                {% endfor %}
+                                <option value="new" class="fw-bold text-primary">+ Add New Subject</option>
+                            </select>
+                        </div>
+
+                        <!-- 1.1 NEW SUBJECT INPUT (Hidden by default, shown if '+ Add New Subject' is chosen) -->
+                        <div class="mb-4" id="newSubjectBox" style="display: none;">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-plus-circle text-success me-1"></i> New Subject Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   name="new_subject"
+                                   id="newSubjectInput"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. Physics, General Knowledge, Mathematics">
+                            <small class="text-muted">Enter the subject name if it's not already in the list above.</small>
+                        </div>
+
+                        <!-- 2. CHAPTER NAME -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-bookmark text-primary me-1"></i> Chapter / Topic Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   name="chapter_name"
+                                   id="chapterInput"
+                                   list="existingChaptersList"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. Chapter 1: Real Numbers, Optics, Algebra"
+                                   required>
+                            <datalist id="existingChaptersList"></datalist>
+                            <small class="text-muted">Type the chapter name or select from suggestions if available.</small>
+                        </div>
+
+                        <!-- 3. MATERIAL TITLE / DESCRIPTION -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-heading text-primary me-1"></i> Material Title / Notes Heading <span class="text-muted fw-normal">(Optional)</span>
+                            </label>
+                            <input type="text"
+                                   name="title"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g. Complete Formula Sheet & Important Concepts">
+                            <small class="text-muted">If left blank, Chapter Name will be used automatically.</small>
+                        </div>
+
+                        <!-- 4. PDF UPLOAD DROPZONE -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">
+                                <i class="fas fa-file-pdf text-danger me-1"></i> Upload PDF File <span class="text-danger">*</span>
+                            </label>
+                            
+                            <div class="pdf-dropzone p-4 text-center border rounded-3" id="dropzoneBox">
+                                <input type="file"
+                                       name="pdf_file"
+                                       id="pdfFileInput"
+                                       accept=".pdf,application/pdf"
+                                       class="d-none"
+                                       required>
+                                <div class="dropzone-content cursor-pointer" onclick="document.getElementById('pdfFileInput').click();">
+                                    <div class="mb-3">
+                                        <i class="fas fa-cloud-upload-alt text-primary" style="font-size: 50px;"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1 text-dark">Click here or Drag & Drop your PDF file here</h6>
+                                    <p class="text-muted small mb-0">Supported format: <strong>.PDF</strong> (Standard documents, handwritten notes, handouts)</p>
+                                </div>
+
+                                <!-- File Preview Bar -->
+                                <div id="filePreview" class="mt-3 p-3 rounded bg-light border d-none">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center overflow-hidden">
+                                            <i class="fas fa-file-pdf fa-2x text-danger me-3"></i>
+                                            <div class="text-left">
+                                                <div class="fw-bold text-truncate text-dark" id="previewFileName" style="max-width: 320px;">file.pdf</div>
+                                                <small class="text-muted" id="previewFileSize">0 KB</small>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" id="removeFileBtn" title="Remove File">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. SUBMIT BUTTON -->
+                        <div class="d-grid gap-2 mt-4 pt-2">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm" id="submitBtn" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: none; padding: 14px;">
+                                <i class="fas fa-check-circle me-2"></i> Save & Upload Material
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<style>
+.pdf-dropzone {
+    border: 2px dashed #93c5fd !important;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.pdf-dropzone:hover, .pdf-dropzone.dragover {
+    border-color: #2563eb !important;
+    background-color: #eff6ff;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+.form-control-lg, .custom-select {
+    border-radius: 8px;
+    font-size: 0.98rem;
+}
+.form-control:focus, .custom-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.2);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const subjectSelect = document.getElementById("subjectSelect");
+    const newSubjectBox = document.getElementById("newSubjectBox");
+    const newSubjectInput = document.getElementById("newSubjectInput");
+    const chaptersList = document.getElementById("existingChaptersList");
+    const fileInput = document.getElementById("pdfFileInput");
+    const dropzoneBox = document.getElementById("dropzoneBox");
+    const dropzoneContent = document.querySelector(".dropzone-content");
+    const filePreview = document.getElementById("filePreview");
+    const previewFileName = document.getElementById("previewFileName");
+    const previewFileSize = document.getElementById("previewFileSize");
+    const removeFileBtn = document.getElementById("removeFileBtn");
+
+    // Handle Subject Dropdown Changes
+    subjectSelect.addEventListener("change", function() {
+        if (this.value === "new") {
+            newSubjectBox.style.display = "block";
+            newSubjectInput.required = true;
+            newSubjectInput.focus();
+            chaptersList.innerHTML = "";
+        } else {
+            newSubjectBox.style.display = "none";
+            newSubjectInput.required = false;
+            newSubjectInput.value = "";
+
+            if (this.value) {
+                // Fetch existing chapters for quick autocomplete
+                fetch(`/api/subject/${this.value}/chapters/`)
+                    .then(res => res.json())
+                    .then(data => {
+                        chaptersList.innerHTML = "";
+                        data.forEach(chap => {
+                            const opt = document.createElement("option");
+                            opt.value = chap.name;
+                            chaptersList.appendChild(opt);
+                        });
+                    })
+                    .catch(err => console.log(err));
+            }
+        }
+    });
+
+    // File selection & preview
+    fileInput.addEventListener("change", function () {
+        handleFile(this.files[0]);
+    });
+
+    // Drag & Drop
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzoneBox.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzoneBox.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzoneBox.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzoneBox.classList.remove('dragover');
+        }, false);
+    });
+
+    dropzoneBox.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFile(files[0]);
+        }
+    });
+
+    function handleFile(file) {
+        if (!file) return;
+
+        if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+            alert('Please select a valid PDF document (.pdf)');
+            fileInput.value = "";
+            return;
+        }
+
+        previewFileName.textContent = file.name;
+        
+        let sizeStr = '';
+        if (file.size < 1024 * 1024) {
+            sizeStr = (file.size / 1024).toFixed(1) + ' KB';
+        } else {
+            sizeStr = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+        previewFileSize.textContent = sizeStr;
+
+        dropzoneContent.classList.add('d-none');
+        filePreview.classList.remove('d-none');
+    }
+
+    removeFileBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        fileInput.value = "";
+        filePreview.classList.add('d-none');
+        dropzoneContent.classList.remove('d-none');
+    });
+
+    // Form submit validation
+    document.getElementById("materialForm").addEventListener("submit", function(e) {
+        if (!fileInput.files || fileInput.files.length === 0) {
+            e.preventDefault();
+            alert("Please select a PDF file to upload.");
+        }
+    });
+});
+</script>
+{% endblock %}

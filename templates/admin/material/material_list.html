@@ -1,0 +1,251 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}Study Material List{% endblock %}
+
+{% block content %}
+<div class="app-main__outer">
+<div class="app-main__inner">
+
+    <!-- PAGE HEADER -->
+    <div class="app-page-title mb-4">
+        <div class="page-title-wrapper d-flex justify-content-between align-items-center flex-wrap">
+            <div class="page-title-heading d-flex align-items-center">
+                <div class="page-title-icon me-3">
+                    <i class="fas fa-folder-open text-primary" style="font-size: 28px;"></i>
+                </div>
+                <div>
+                    <h4 class="mb-0 fw-bold text-dark">Study Materials & Notes</h4>
+                    <div class="page-title-subheading text-muted">
+                        View, download, and manage uploaded PDF study materials
+                    </div>
+                </div>
+            </div>
+            <div class="page-title-actions mt-2 mt-md-0 d-flex gap-2">
+                <a href="{% url 'add_material' %}" class="btn btn-primary btn-sm px-3 shadow-sm" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: none;">
+                    <i class="fas fa-plus-circle me-1"></i> Add Material
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row mb-4">
+        <div class="col-md-4 col-sm-6 mb-3 mb-md-0">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Total Materials</span>
+                    <h3 class="fw-bold mb-0 text-primary mt-1">{{ materials.count }}</h3>
+                </div>
+                <div class="rounded-circle bg-light-primary p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #eff6ff;">
+                    <i class="fas fa-file-pdf text-primary fa-lg"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6 mb-3 mb-md-0">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Total Subjects</span>
+                    <h3 class="fw-bold mb-0 text-success mt-1">{{ subjects.count }}</h3>
+                </div>
+                <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #ecfdf5;">
+                    <i class="fas fa-book text-success fa-lg"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Latest Upload</span>
+                    <h6 class="fw-bold mb-0 text-dark mt-1 text-truncate" style="max-width: 180px;">
+                        {% if materials.first %}{{ materials.first.chapter_name }}{% else %}No Materials Yet{% endif %}
+                    </h6>
+                    <small class="text-muted">{% if materials.first %}{{ materials.first.created_at|date:"d M Y" }}{% else %}-{% endif %}</small>
+                </div>
+                <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #fdf2f8;">
+                    <i class="fas fa-clock text-danger fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN TABLE CARD -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap">
+            <h6 class="fw-bold text-dark mb-0">
+                <i class="fas fa-list-ul text-primary me-2"></i> All Study Materials
+            </h6>
+            
+            <!-- Quick Filter -->
+            <div class="d-flex align-items-center mt-2 mt-sm-0">
+                <label class="me-2 mb-0 small text-muted fw-bold">Filter Subject:</label>
+                <select id="subjectFilter" class="form-control form-control-sm custom-select" style="min-width: 160px; border-radius: 6px;">
+                    <option value="">All Subjects</option>
+                    {% for sub in subjects %}
+                        <option value="{{ sub.name }}">{{ sub.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            {% if materials %}
+            <div class="table-responsive">
+                <table id="materials-table" class="table table-hover align-middle mb-0 w-100">
+                    <thead class="bg-light text-dark text-uppercase small" style="letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="text-center py-3" style="width: 60px;">#</th>
+                            <th class="py-3">Subject</th>
+                            <th class="py-3">Chapter / Topic</th>
+                            <th class="py-3">Material Title</th>
+                            <th class="py-3 text-center">Uploaded Date & Time</th>
+                            <th class="py-3 text-center">Size</th>
+                            <th class="py-3 text-center" style="width: 220px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in materials %}
+                        <tr>
+                            <td class="text-center fw-bold text-muted">{{ forloop.counter }}</td>
+                            <td>
+                                <span class="badge rounded-pill px-3 py-2 text-primary" style="background-color: #eff6ff; font-size: 0.85rem; border: 1px solid #bfdbfe;">
+                                    <i class="fas fa-book me-1"></i> {{ m.subject.name }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ m.chapter_name }}</div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-pdf text-danger fa-lg me-2"></i>
+                                    <div>
+                                        <span class="text-dark fw-semibold">{{ m.title|default:m.chapter_name }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="text-dark fw-semibold">{{ m.created_at|date:"d M Y" }}</div>
+                                <small class="text-muted">{{ m.created_at|date:"h:i A" }}</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border px-2 py-1">{{ m.file_size_display }}</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group gap-1" role="group">
+                                    <!-- View PDF Button -->
+                                    <a href="{{ m.pdf_file.url }}"
+                                       target="_blank"
+                                       class="btn btn-info btn-sm text-white px-2 py-1 shadow-sm"
+                                       title="View PDF"
+                                       style="border-radius: 6px;">
+                                        <i class="fas fa-eye me-1"></i> View
+                                    </a>
+
+                                    <!-- Download PDF Button -->
+                                    <a href="{% url 'download_material' m.id %}"
+                                       class="btn btn-success btn-sm px-2 py-1 shadow-sm"
+                                       title="Download PDF"
+                                       style="border-radius: 6px;">
+                                        <i class="fas fa-download me-1"></i> Download
+                                    </a>
+
+                                    <!-- Delete Button -->
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm px-2 py-1 delete-btn shadow-sm"
+                                            data-url="{% url 'delete_material' m.id %}"
+                                            data-title="{{ m.chapter_name }}"
+                                            title="Delete Material"
+                                            style="border-radius: 6px;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-folder-open text-muted" style="font-size: 60px; opacity: 0.4;"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">No Study Materials Found</h5>
+                <p class="text-muted mb-3">Upload your first PDF study material, handwritten notes, or formula sheet.</p>
+                <a href="{% url 'add_material' %}" class="btn btn-primary btn-sm px-4 py-2" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: none;">
+                    <i class="fas fa-plus-circle me-1"></i> Upload Material Now
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<style>
+.table td, .table th {
+    vertical-align: middle;
+}
+#materials-table_wrapper {
+    padding: 1rem;
+}
+.dataTables_filter input {
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    padding: 4px 8px;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+$(document).ready(function () {
+    // Initialize DataTable
+    if ($('#materials-table').length) {
+        let table = $('#materials-table').DataTable({
+            pageLength: 10,
+            responsive: true,
+            ordering: true,
+            language: {
+                search: "_INPUT_",
+                searchPlaceholder: "Search materials..."
+            }
+        });
+
+        // Subject Filter Dropdown
+        $('#subjectFilter').on('change', function () {
+            let val = $(this).val();
+            table.column(1).search(val ? val : '', true, false).draw();
+        });
+    }
+
+    // SweetAlert Delete Confirmation
+    $(".delete-btn").on("click", function () {
+        let url = $(this).data("url");
+        let title = $(this).data("title") || "this material";
+
+        Swal.fire({
+            title: "Delete Material?",
+            text: `Are you sure you want to delete material for "${title}"? This cannot be undone.`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

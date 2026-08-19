@@ -14,13 +14,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- Modern Calm Animated Background --- */
+        /* --- Multi-Color Changing Animated Background --- */
         body {
             font-family: 'Poppins', sans-serif;
-            /* Calm Blue & Teal Gradient */
-            background: linear-gradient(-45deg, #1a365d, #2d3748, #2c5282, #2b6cb0);
+            /* Vibrant Multi-Color Gradient (Red, Pink, Blue, Teal) */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab, #ff9a9e);
             background-size: 400% 400%;
-            animation: gradientBG 18s ease infinite;
+            animation: gradientBG 15s ease infinite;
             overflow-x: hidden;
             color: #333;
         }
@@ -31,22 +31,22 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* --- Modern Glassmorphism Sidebar --- */
+        /* --- Glassmorphism Sidebar --- */
         #sidebar-wrapper {
             min-height: 100vh;
             width: 260px;
             margin-left: -260px;
-            /* Deep Blue Gradient */
-            background: linear-gradient(135deg, rgba(26, 54, 93, 0.95) 0%, rgba(45, 55, 72, 0.98) 100%);
-            backdrop-filter: blur(12px);
-            border-right: 1px solid rgba(255,255,255,0.08);
+            /* Glassy Purple/Pink Gradient */
+            background: linear-gradient(135deg, rgba(70, 20, 70, 0.85) 0%, rgba(45, 20, 80, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255,255,255,0.1);
             transition: margin 0.25s ease-out;
             position: fixed;
             top: 0;
             left: 0;
             bottom: 0;
             z-index: 1000;
-            box-shadow: 5px 0 25px rgba(0,0,0,0.3);
+            box-shadow: 5px 0 25px rgba(0,0,0,0.2);
             overflow-y: auto;
         }
 
@@ -86,12 +86,12 @@
             padding-left: 20px; /* Prevent padding jump */
         }
 
-        /* Active Main Item (Modern Blue Gradient) */
+        /* Active Main Item (Royal Indigo Gradient) */
         #sidebar-wrapper .list-group > .list-group-item.active {
-            background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+            background: linear-gradient(135deg, #4F46E5 0%, #7c3aed 100%);
             border: none;
             color: #fff !important;
-            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.4);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
             transform: scale(1.02);
         }
 
@@ -235,24 +235,24 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
 
-        /* Modern Blue Buttons */
+        /* Royal Indigo Buttons */
         .btn-custom {
-            background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+            background: linear-gradient(135deg, #4F46E5 0%, #4338ca 100%);
             color: #fff;
             border: none;
             border-radius: 50px;
             padding: 8px 20px;
-            box-shadow: 0 4px 15px rgba(49, 130, 206, 0.4);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
             transition: all 0.3s ease;
         }
         
         .btn-custom:hover {
             color: #fff;
             transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.6);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.6);
         }
         
-        /* Modern Blue Scrollbar */
+        /* Royal Indigo Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -260,30 +260,30 @@
             background: #f1f1f1;
         }
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #3182ce, #2b6cb0);
+            background: linear-gradient(180deg, #4F46E5, #4338ca);
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #2c5282;
+            background: #3730a3;
         }
 
-        /* --- Card Gradients (Modern & Calm) --- */
+        /* --- Card Gradients (Vibrant) --- */
         .bg-primary {
-            background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%) !important;
-            box-shadow: 0 8px 20px rgba(49, 130, 206, 0.4);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
         }
         .bg-success {
-            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%) !important;
-            box-shadow: 0 8px 20px rgba(56, 161, 105, 0.4);
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%) !important;
+            box-shadow: 0 8px 20px rgba(67, 233, 123, 0.4);
         }
         .bg-info {
-            background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%) !important;
-            box-shadow: 0 8px 20px rgba(128, 90, 213, 0.4);
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+            box-shadow: 0 8px 20px rgba(250, 112, 154, 0.4);
         }
         .bg-warning {
-             background: linear-gradient(135deg, #dd6b20 0%, #c05621 100%) !important;
+             background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%) !important;
              color: #fff !important;
-             box-shadow: 0 8px 20px rgba(221, 107, 32, 0.4);
+             box-shadow: 0 8px 20px rgba(255, 154, 158, 0.4);
         }
         /* --- Logout Button Animations --- */
         .logout-btn-animate {
@@ -422,6 +422,34 @@
                     </a>
                     <a href="{% url 'exam_task_list' %}" class="list-group-item list-group-item-action">
                         <i class="fas fa-list"></i> Task List
+                    </a>
+                </div>
+
+                <!-- Study Materials -->
+                <a href="#submenu7" data-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action collapsed d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-file-pdf"></i> Materials</span>
+                    <i class="fas fa-chevron-right submenu-icon"></i>
+                </a>
+                <div id="submenu7" class="collapse sidebar-submenu">
+                    <a href="{% url 'add_material' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus-circle"></i> Add Material
+                    </a>
+                    <a href="{% url 'material_list' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-list"></i> Material List
+                    </a>
+                </div>
+
+                <!-- Live Classes -->
+                <a href="#submenu8" data-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action collapsed d-flex justify-content-between align-items-center">
+                    <span><i class="fab fa-youtube text-danger"></i> Live Classes</span>
+                    <i class="fas fa-chevron-right submenu-icon"></i>
+                </a>
+                <div id="submenu8" class="collapse sidebar-submenu">
+                    <a href="{% url 'add_live_class' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus-circle"></i> Add Live Class
+                    </a>
+                    <a href="{% url 'live_class_list' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-list"></i> Live Class List
                     </a>
                 </div>
                 

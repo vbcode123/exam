@@ -420,6 +420,34 @@
                     </div>
                 </a>
 
+                <!-- My Materials -->
+                <a href="{% url 'student_materials' %}" class="hub-card">
+                    <div class="card-icon-wrapper" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+                        <i class="fas fa-book-reader card-icon"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title" style="color: #ea580c;">My Materials</div>
+                        <div class="card-desc">Access, view, download PDF study notes and chapter materials.</div>
+                    </div>
+                    <div class="card-arrow" style="color: #ea580c;">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- Live Classes -->
+                <a href="{% url 'student_live_classes' %}" class="hub-card">
+                    <div class="card-icon-wrapper" style="background: linear-gradient(135deg, #ef4444, #b91c1c);">
+                        <i class="fab fa-youtube card-icon"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title" style="color: #dc2626;">Live Classes</div>
+                        <div class="card-desc">Watch live stream lectures and recorded video classes.</div>
+                    </div>
+                    <div class="card-arrow" style="color: #dc2626;">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
                 <!-- Logout (Mobile/Card) -->
                 <a href="{% url 'student_logout' %}" class="hub-card d-md-none">
                     <div class="card-icon-wrapper">

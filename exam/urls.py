@@ -197,6 +197,17 @@ urlpatterns = [
         views.student_id_card,
         name="student_id_card"
     ),
+
+    # ---------------- STUDENT STUDY MATERIALS ----------------
+    path("student/materials/", views.student_materials, name="student_materials"),
+    path("student/material/download/<int:id>/", views.student_download_material, name="student_download_material"),
+    path("student/material/delete/<int:id>/", views.student_delete_material, name="student_delete_material"),
+
+    # ---------------- STUDENT LIVE CLASSES ----------------
+    path("student/live-classes/", views.student_live_classes, name="student_live_classes"),
+    path("student/live-class/delete/<int:id>/", views.student_delete_live_class, name="student_delete_live_class"),
+
+
 #=============Create Center Admin===============================
     # ---------------- CENTER MANAGEMENT ----------------
     path("panel/add-center/", views.add_center, name="add_center"),
@@ -223,6 +234,24 @@ urlpatterns = [
     path("center/student/view/<int:id>/", views.center_student_view, name="center_student_view"),
     path("center/student/edit/<int:id>/", views.center_student_edit, name="center_student_edit"),
     path("center/student/delete/<int:id>/", views.center_student_delete, name="center_student_delete"),
+
+
+    # =====================================================
+    # STUDY MATERIAL MANAGEMENT (ADMIN)
+    # =====================================================
+    path('panel/add-material/', views.add_material, name='add_material'),
+    path('panel/material-list/', views.material_list, name='material_list'),
+    path('panel/material/delete/<int:id>/', views.delete_material, name='delete_material'),
+    path('panel/material/download/<int:id>/', views.download_material, name='download_material'),
+    path('api/subject/<int:subject_id>/chapters/', views.get_subject_chapters, name='get_subject_chapters'),
+
+
+    # =====================================================
+    # LIVE CLASSES MANAGEMENT (ADMIN)
+    # =====================================================
+    path('panel/add-live-class/', views.add_live_class, name='add_live_class'),
+    path('panel/live-class-list/', views.live_class_list, name='live_class_list'),
+    path('panel/live-class/delete/<int:id>/', views.delete_live_class, name='delete_live_class'),
 
     
     # =====================================================

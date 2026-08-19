@@ -399,3 +399,60 @@ class Center(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# ===========================
+# STUDY MATERIAL MODEL
+# ===========================
+class StudyMaterial(models.Model):
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="materials")
+    chapter_name = models.CharField(max_length=200)
+    title = models.CharField(max_length=255, blank=True, null=True)
+    pdf_file = models.FileField(upload_to="materials/")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.subject.name} - {self.chapter_name}"
+
+    @property
+    def file_size_display(self):
+        try:
+            bytes_size = self.pdf_file.size
+            if bytes_size < 1024 * 1024:
+                return f"{round(bytes_size / 1024, 1)} KB"
+            return f"{round(bytes_size / (1024 * 1024), 2)} MB"
+        except Exception:
+            return "N/A"
+
+
+# ===========================
+# LIVE CLASS MODEL
+# ===========================
+class LiveClass(models.Model):
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name="live_classes")
+    chapter_name = models.CharField(max_length=200)
+    title = models.CharField(max_length=255, blank=True, null=True)
+    youtube_url = models.URLField(max_length=500)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.subject.name} - {self.chapter_name}"
+
+    @property
+    def youtube_video_id(self):
+        import re
+        url = self.youtube_url or ""
+        match = re.search(r'(?:v=|\/|youtu\.be\/|embed\/|live\/)([0-9A-Za-z_-]{11})', url)
+        return match.group(1) if match else None
+
+    @property
+    def youtube_embed_url(self):
+        vid = self.youtube_video_id
+        return f"https://www.youtube.com/embed/{vid}" if vid else self.youtube_url
+
+    @property
+    def youtube_thumbnail_url(self):
+        vid = self.youtube_video_id
+        return f"https://img.youtube.com/vi/{vid}/hqdefault.jpg" if vid else None
+
+
